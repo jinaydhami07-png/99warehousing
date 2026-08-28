@@ -1,0 +1,26 @@
+# Dependencies
+node_modules/
+
+# ⚠ Secrets — never commit.
+# No leading slash, so these match at any depth — including server/.env,
+# which holds the live MongoDB connection string and the admin passkey.
+.env
+.env.local
+.env*.local
+
+# Runtime output
+server/logs/
+*.log
+npm-debug.log*
+
+# Uploaded images (keep the folder, ignore the contents).
+# Property photos live in MongoDB, so this only catches anything written to
+# disk by manual testing.
+public/uploads/*
+!public/uploads/README.md
+
+# OS / editors
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/

@@ -1,0 +1,52 @@
+{
+  "name": "bpsf-api",
+  "version": "1.0.0",
+  "private": true,
+  "description": "99Warehousing — production Express + MongoDB API",
+  "main": "src/server.js",
+  "engines": {
+    "node": ">=18.18"
+  },
+  "scripts": {
+    "start": "node src/server.js",
+    "dev": "nodemon src/server.js",
+    "seed": "node src/jobs/seed.js",
+    "seed:fresh": "node src/jobs/seed.js --wipe",
+    "migrate:images": "node src/jobs/migrate-images-to-s3.js",
+    "migrate:images:dry": "node src/jobs/migrate-images-to-s3.js --dry-run",
+    "test": "node --test tests/",
+    "pm2:start": "pm2 start ecosystem.config.js",
+    "pm2:stop": "pm2 stop bpsf-api",
+    "pm2:restart": "pm2 restart bpsf-api",
+    "pm2:status": "pm2 status",
+    "pm2:logs": "pm2 logs bpsf-api --lines 50",
+    "pm2:save": "pm2 save"
+  },
+  "dependencies": {
+    "@aws-sdk/client-s3": "^3.1112.0",
+    "bcryptjs": "^2.4.3",
+    "compression": "^1.7.4",
+    "cookie-parser": "^1.4.6",
+    "cors": "^2.8.5",
+    "dotenv": "^16.4.5",
+    "express": "^4.19.2",
+    "express-mongo-sanitize": "^2.2.0",
+    "express-rate-limit": "^7.4.0",
+    "helmet": "^7.1.0",
+    "hpp": "^0.2.3",
+    "jsonwebtoken": "^9.0.2",
+    "mongoose": "^8.6.0",
+    "morgan": "^1.10.0",
+    "multer": "^2.2.0",
+    "pino": "^9.4.0",
+    "pino-http": "^10.3.0",
+    "sanitize-html": "^2.13.1",
+    "sharp": "^0.34.5",
+    "zod": "^3.23.8"
+  },
+  "devDependencies": {
+    "nodemon": "^3.1.4",
+    "pino-pretty": "^11.2.2",
+    "pm2": "^7.0.3"
+  }
+}

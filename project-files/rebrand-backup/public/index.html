@@ -1,0 +1,1729 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Buy Per Square Foot — India's Most Trusted Warehousing Platform</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;0,600;0,700;1,400;1,500&family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;1,300;1,400;1,500&family=Jost:wght@300;400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="assets/site.css">
+<style>
+
+
+
+
+  /* ─── LIQUID GLASS NAVBAR ─── */
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  /* ─── HERO ─── */
+  .hero {
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    position: relative;
+    overflow: hidden;
+    padding: 130px 40px 70px;
+  }
+
+  /* Slogan block sits top-left; the featured cards sit below and pull right. */
+  .hero-inner {
+    position: relative;
+    z-index: 2;
+    width: 100%;
+    max-width: 1200px;
+    margin: 0 auto;
+    display: flex;
+    flex-direction: column;
+    gap: 40px;
+  }
+
+  .hero-copy {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    max-width: 640px;
+  }
+
+  /* Bottom band: stats fill the space to the left of the cards. */
+  .hero-bottom {
+    display: grid;
+    grid-template-columns: 1fr auto;
+    gap: 48px;
+    align-items: end;
+  }
+
+  /* ─── FEATURED PROPERTY CARDS ─── */
+  .hero-featured {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 20px;
+    width: 100%;
+    max-width: 660px;
+    margin-left: auto;
+  }
+
+  .feat-card {
+    background: rgba(255,255,255,0.55);
+    border: 1px solid rgba(255,255,255,0.75);
+    border-radius: 18px;
+    padding: 14px;
+    box-shadow: inset 0 1px 0 rgba(255,255,255,0.9), 0 8px 28px rgba(74,55,40,0.08);
+    text-decoration: none;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    transition: transform 0.25s ease, box-shadow 0.25s ease;
+    animation: fadeUp 0.6s 0.7s ease both;
+  }
+
+  .feat-card:hover {
+    transform: translateY(-4px);
+    box-shadow: inset 0 1px 0 rgba(255,255,255,0.95), 0 16px 40px rgba(74,55,40,0.14);
+  }
+
+  .feat-photo {
+    aspect-ratio: 4 / 3;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 34px;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .feat-photo-1 { background: linear-gradient(135deg, rgba(200,216,228,0.85), rgba(139,163,184,0.55)); }
+  .feat-photo-2 { background: linear-gradient(135deg, rgba(232,221,208,0.9), rgba(196,168,130,0.55)); }
+  .feat-photo-3 { background: linear-gradient(135deg, rgba(212,176,106,0.5), rgba(154,175,155,0.5)); }
+
+  .feat-tag {
+    position: absolute;
+    top: 8px;
+    left: 8px;
+    font-size: 8px;
+    letter-spacing: 1.2px;
+    text-transform: uppercase;
+    color: var(--deep-mahogany);
+    background: rgba(255,255,255,0.82);
+    border-radius: 100px;
+    padding: 3px 9px;
+  }
+
+  .feat-name {
+    font-family: var(--font-display);
+    font-size: 15px;
+    color: var(--deep-mahogany);
+    line-height: 1.3;
+  }
+
+  .feat-loc {
+    font-size: 11px;
+    color: var(--text-mid);
+    margin-top: 2px;
+  }
+
+  .feat-foot {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 8px;
+    padding-top: 10px;
+    border-top: 1px solid rgba(200,168,130,0.2);
+  }
+
+  .feat-rate {
+    font-family: var(--font-display);
+    font-size: 17px;
+    color: var(--deep-mahogany);
+  }
+
+  .feat-rate span { font-family: var(--font-body); font-size: 10px; color: var(--text-mid); }
+  .feat-area { font-size: 10px; letter-spacing: 0.5px; color: var(--warm-tan); }
+
+  /* ─── HERO BACKDROP ───────────────────────────────────────
+     Landscape photograph treatment: sun-bleached on the left so the
+     headline stays readable, countryside green on the right.
+
+     ▶ TO USE A REAL PHOTO: drop the file in client/assets/ and set
+         --hero-photo: url('assets/hero.jpg');
+       on .hero-bg below. Everything else (the white wash, the dot
+       matrix, the vignette) layers on top automatically.
+       Recommended: ~2400px wide, landscape, subject on the RIGHT third. */
+  .hero-bg {
+    /* Real photograph — client/assets/img/hero.png. The illustrated SVG
+       scene (.hero-scene) stays in the markup as a fallback and is hidden
+       by the .has-photo class on the element below. To swap the photo,
+       replace hero.png or point this at a different file. */
+    --hero-photo: url('assets/img/hero.png');
+
+    position: absolute;
+    inset: 0;
+    overflow: hidden;
+    background-color: #DCE6EC;
+    background-image: var(--hero-photo);
+    background-size: cover;
+    background-position: center right;
+    background-repeat: no-repeat;
+  }
+
+  .hero-scene {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    display: block;
+  }
+
+  /* A photo supersedes the illustration. */
+  .hero-bg[style*="--hero-photo"] .hero-scene,
+  .hero-bg.has-photo .hero-scene { display: none; }
+
+  /* Sun-bleached wash so the headline always has clean ground under it. */
+  .hero-wash {
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    background:
+      radial-gradient(ellipse 50% 44% at 13% 20%, rgba(255,255,255,0.92) 0%, rgba(255,255,255,0.5) 38%, rgba(255,255,255,0) 68%),
+      linear-gradient(96deg, rgba(255,255,255,0.95) 0%, rgba(255,255,255,0.80) 16%, rgba(255,255,255,0.44) 33%, rgba(255,255,255,0.10) 50%, rgba(255,255,255,0) 64%),
+      linear-gradient(to bottom, transparent 70%, rgba(250,247,242,0.5) 87%, var(--off-white) 100%);
+  }
+
+  /* Dot matrix bleeding in from the top-right, as in the reference. */
+  .hero-dots {
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    background-image: radial-gradient(circle, rgba(70,100,128,0.5) 1.3px, transparent 1.4px);
+    background-size: 13px 13px;
+    -webkit-mask-image: linear-gradient(216deg, rgba(0,0,0,0.95) 0%, rgba(0,0,0,0.6) 12%, rgba(0,0,0,0.2) 24%, transparent 36%);
+    mask-image: linear-gradient(216deg, rgba(0,0,0,0.95) 0%, rgba(0,0,0,0.6) 12%, rgba(0,0,0,0.2) 24%, transparent 36%);
+  }
+
+  .hero-badge {
+    position: relative;
+    z-index: 2;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    background: rgba(255,255,255,0.5);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border: 1px solid rgba(255,255,255,0.8);
+    border-radius: 100px;
+    padding: 8px 20px;
+    box-shadow: inset 0 1px 0 rgba(255,255,255,0.9), 0 4px 16px rgba(74,55,40,0.06);
+    font-family: var(--font-body);
+    font-size: 10px;
+    font-weight: 400;
+    letter-spacing: 2.5px;
+    text-transform: uppercase;
+    color: var(--antique-gold);
+    margin-bottom: 20px;
+    animation: fadeUp 0.6s ease both;
+  }
+
+  .hero-badge::before { content: '✦'; font-size: 8px; }
+
+  .hero-h1 {
+    position: relative;
+    z-index: 2;
+    font-family: var(--font-display);
+    font-size: clamp(42px, 5.4vw, 64px);
+    font-weight: 400;
+    color: var(--deep-mahogany);
+    text-align: left;
+    line-height: 1.06;
+    letter-spacing: -0.015em;
+    text-wrap: balance;
+    max-width: 640px;
+    margin-bottom: 20px;
+    animation: fadeUp 0.6s 0.2s ease both;
+  }
+
+  .hero-h1 em {
+    font-style: italic;
+    color: var(--antique-brown);
+  }
+
+  .hero-sub {
+    position: relative;
+    z-index: 2;
+    font-family: var(--font-body);
+    font-size: 15px;
+    font-weight: 300;
+    color: var(--text-mid);
+    line-height: 1.7;
+    max-width: 470px;
+    text-align: left;
+    margin-bottom: 32px;
+    animation: fadeUp 0.6s 0.4s ease both;
+  }
+
+  .hero-ctas {
+    position: relative;
+    z-index: 2;
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    animation: fadeUp 0.6s 0.55s ease both;
+  }
+
+  .btn-hero-primary {
+    font-family: var(--font-body);
+    font-size: 11px;
+    font-weight: 500;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: var(--deep-mahogany);
+    background: linear-gradient(135deg, rgba(200,216,228,0.7), rgba(245,240,232,0.8));
+    backdrop-filter: blur(30px);
+    -webkit-backdrop-filter: blur(30px);
+    border: 1px solid rgba(255,255,255,0.85);
+    border-radius: 100px;
+    padding: 14px 36px;
+    cursor: pointer;
+    box-shadow: 0 8px 32px rgba(74,55,40,0.1), inset 0 1px 0 rgba(255,255,255,0.9);
+    transition: all 0.25s ease;
+    text-decoration: none;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .btn-hero-primary::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(105deg, transparent 40%, rgba(255,255,255,0.4) 50%, transparent 60%);
+    transform: translateX(-100%);
+    transition: transform 0.5s ease;
+  }
+
+  .btn-hero-primary:hover::after { transform: translateX(100%); }
+  .btn-hero-primary:hover { transform: translateY(-2px); box-shadow: 0 12px 40px rgba(74,55,40,0.15), inset 0 1px 0 rgba(255,255,255,0.9); }
+
+  .btn-hero-secondary {
+    font-family: var(--font-body);
+    font-size: 11px;
+    font-weight: 400;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: var(--antique-brown);
+    background: rgba(245,240,232,0.5);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border: 1px solid rgba(200,168,130,0.3);
+    border-radius: 100px;
+    padding: 14px 32px;
+    cursor: pointer;
+    transition: all 0.25s ease;
+    text-decoration: none;
+  }
+
+  .btn-hero-secondary:hover { background: rgba(245,240,232,0.7); transform: translateY(-2px); }
+
+  /* Stat grid — occupies the open space beside the featured cards */
+  .hero-stats {
+    display: grid;
+    grid-template-columns: repeat(2, max-content);
+    gap: 22px 40px;
+    padding-bottom: 6px;
+    animation: fadeUp 0.6s 0.7s ease both;
+  }
+
+  .stat-card { white-space: nowrap; }
+
+  .stat-num {
+    font-family: var(--font-display);
+    font-size: 30px;
+    font-weight: 500;
+    color: var(--deep-mahogany);
+    display: block;
+    font-variant-numeric: tabular-nums;
+  }
+
+  .stat-label {
+    font-family: var(--font-body);
+    font-size: 10px;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    color: var(--antique-brown);
+    display: block;
+    margin-top: 3px;
+  }
+
+  .scroll-arrow {
+    position: absolute;
+    bottom: 30px;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 3;
+    width: 40px; height: 40px;
+    background: rgba(255,255,255,0.4);
+    backdrop-filter: blur(12px);
+    border: 1px solid rgba(255,255,255,0.7);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    animation: bounce 2s ease-in-out infinite, fadeUp 0.6s 1s ease both;
+    cursor: pointer;
+    transition: opacity 0.4s;
+  }
+
+  .scroll-arrow svg { width: 14px; color: var(--antique-brown); }
+
+  @keyframes bounce {
+    0%, 100% { transform: translateX(-50%) translateY(0); }
+    50% { transform: translateX(-50%) translateY(6px); }
+  }
+
+  /* ─── TRUST STRIP ─── */
+  .trust-strip {
+    background: rgba(245,240,232,0.6);
+    backdrop-filter: blur(16px);
+    border-top: 1px solid rgba(200,168,130,0.2);
+    border-bottom: 1px solid rgba(200,168,130,0.2);
+    padding: 20px 0;
+    overflow: hidden;
+  }
+
+  .trust-inner {
+    display: flex;
+    align-items: center;
+    gap: 0;
+    animation: scrollLeft 25s linear infinite;
+    width: max-content;
+  }
+
+  @keyframes scrollLeft {
+    from { transform: translateX(0); }
+    to { transform: translateX(-50%); }
+  }
+
+  .trust-label {
+    font-family: var(--font-body);
+    font-size: 10px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: var(--warm-tan);
+    padding: 0 32px;
+    white-space: nowrap;
+  }
+
+  .trust-logo {
+    font-family: var(--font-display);
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--antique-brown);
+    opacity: 0.6;
+    padding: 0 36px;
+    white-space: nowrap;
+    letter-spacing: 0.05em;
+  }
+
+  .trust-divider {
+    width: 1px; height: 16px;
+    background: rgba(200,168,130,0.3);
+    flex-shrink: 0;
+  }
+
+  /* ─── SECTION LAYOUT ─── */
+  section { padding: 100px 60px; max-width: 1200px; margin: 0 auto; }
+  .section-label {
+    font-family: var(--font-editorial);
+    font-size: 12px;
+    font-weight: 400;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    color: var(--antique-gold);
+    margin-bottom: 16px;
+    display: block;
+    font-style: italic;
+  }
+
+  .section-h2 {
+    font-family: var(--font-display);
+    font-size: clamp(32px, 4vw, 44px);
+    font-weight: 400;
+    color: var(--deep-mahogany);
+    line-height: 1.15;
+    margin-bottom: 16px;
+  }
+
+  .section-h2 em { font-style: italic; color: var(--antique-brown); }
+
+  .section-sub {
+    font-family: var(--font-body);
+    font-size: 15px;
+    font-weight: 300;
+    color: var(--text-mid);
+    line-height: 1.75;
+    max-width: 540px;
+    margin-bottom: 56px;
+  }
+
+  /* ─── GLASSMORPHISM CARDS ─── */
+  .glass-card {
+    background: rgba(245,240,232,0.55);
+    backdrop-filter: blur(20px) saturate(160%);
+    -webkit-backdrop-filter: blur(20px) saturate(160%);
+    border: 1px solid rgba(255,255,255,0.70);
+    border-radius: 16px;
+    box-shadow: inset 0 1px 0 rgba(255,255,255,0.85), 0 8px 32px rgba(139,111,78,0.08);
+    transition: all 0.3s ease;
+  }
+
+  .glass-card:hover {
+    transform: translateY(-3px);
+    box-shadow: inset 0 1px 0 rgba(255,255,255,0.85), 0 16px 48px rgba(139,111,78,0.14);
+  }
+
+  /* ─── LISTING CARDS GRID ─── */
+  .listings-section { background: var(--off-white); }
+  .listings-section > div { max-width: 1200px; margin: 0 auto; padding: 100px 60px; }
+
+  .listings-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+    gap: 24px;
+  }
+
+  .listing-card {
+    background: rgba(245,240,232,0.55);
+    backdrop-filter: blur(20px) saturate(160%);
+    -webkit-backdrop-filter: blur(20px) saturate(160%);
+    border: 1px solid rgba(255,255,255,0.70);
+    border-radius: 16px;
+    box-shadow: inset 0 1px 0 rgba(255,255,255,0.85), 0 8px 32px rgba(139,111,78,0.08);
+    overflow: hidden;
+    transition: all 0.3s ease;
+    cursor: pointer;
+  }
+
+  .listing-card:hover { transform: translateY(-3px); box-shadow: inset 0 1px 0 rgba(255,255,255,0.85), 0 16px 48px rgba(139,111,78,0.14); }
+
+  .listing-photo {
+    height: 200px;
+    object-fit: cover;
+    width: 100%;
+    background: linear-gradient(135deg, var(--powder-blue) 0%, var(--linen-beige) 100%);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+  }
+
+  .listing-photo-inner {
+    height: 200px;
+    background: linear-gradient(135deg, rgba(200,216,228,0.6), rgba(196,168,130,0.4));
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 48px;
+  }
+
+  .verified-badge {
+    position: absolute;
+    top: 12px;
+    right: 12px;
+    background: linear-gradient(135deg, var(--warm-gold), var(--antique-gold));
+    color: white;
+    font-family: var(--font-body);
+    font-size: 9px;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    font-weight: 500;
+    padding: 5px 12px;
+    border-radius: 100px;
+    box-shadow: 0 2px 8px rgba(184,150,74,0.3);
+  }
+
+  .listing-body { padding: 24px; }
+
+  .listing-price {
+    font-family: var(--font-display);
+    font-size: 22px;
+    font-weight: 400;
+    color: var(--deep-mahogany);
+    margin-bottom: 6px;
+  }
+
+  .listing-price span {
+    font-size: 14px;
+    color: var(--antique-brown);
+    font-family: var(--font-body);
+  }
+
+  .listing-title {
+    font-family: var(--font-display);
+    font-size: 18px;
+    font-weight: 500;
+    color: var(--deep-mahogany);
+    margin-bottom: 8px;
+  }
+
+  .listing-meta {
+    font-family: var(--font-body);
+    font-size: 12px;
+    color: var(--text-mid);
+    margin-bottom: 16px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-wrap: wrap;
+  }
+
+  .listing-meta span { display: flex; align-items: center; gap: 4px; }
+  .listing-divider { width: 1px; height: 10px; background: var(--warm-tan); opacity: 0.4; }
+
+  .listing-tags { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 20px; }
+
+  .tag {
+    font-family: var(--font-body);
+    font-size: 10px;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    color: var(--dusty-steel);
+    background: rgba(200,216,228,0.3);
+    border: 1px solid rgba(139,163,184,0.25);
+    border-radius: 100px;
+    padding: 4px 12px;
+  }
+
+  .listing-footer {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding-top: 16px;
+    border-top: 1px solid rgba(196,168,130,0.2);
+  }
+
+  .btn-glass {
+    font-family: var(--font-body);
+    font-size: 11px;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    color: var(--antique-brown);
+    background: rgba(255,255,255,0.5);
+    backdrop-filter: blur(20px);
+    border: 1px solid rgba(255,255,255,0.7);
+    border-radius: 100px;
+    padding: 8px 20px;
+    cursor: pointer;
+    transition: all 0.25s ease;
+    box-shadow: inset 0 1px 0 rgba(255,255,255,0.8);
+  }
+
+  .btn-glass:hover { transform: translateY(-1px); background: rgba(255,255,255,0.7); }
+
+  .btn-primary {
+    font-family: var(--font-body);
+    font-size: 11px;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    color: var(--off-white);
+    background: linear-gradient(135deg, var(--antique-brown), var(--deep-mahogany));
+    border: none;
+    border-radius: 0;
+    padding: 10px 24px;
+    cursor: pointer;
+    transition: all 0.25s ease;
+    box-shadow: 0 4px 16px rgba(74,55,40,0.2);
+  }
+
+  .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 8px 24px rgba(74,55,40,0.3); }
+
+  .btn-gold {
+    font-family: var(--font-body);
+    font-size: 11px;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    color: var(--deep-mahogany);
+    background: linear-gradient(135deg, var(--warm-gold), var(--antique-gold));
+    border: none;
+    border-radius: 100px;
+    padding: 10px 24px;
+    cursor: pointer;
+    transition: all 0.25s ease;
+    box-shadow: 0 4px 16px rgba(184,150,74,0.25);
+  }
+
+  .btn-gold:hover { transform: translateY(-2px); box-shadow: 0 8px 24px rgba(184,150,74,0.35); }
+
+  .btn-outline {
+    font-family: var(--font-body);
+    font-size: 11px;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    color: var(--antique-brown);
+    background: transparent;
+    border: 1.5px solid var(--antique-brown);
+    border-radius: 0;
+    padding: 9px 22px;
+    cursor: pointer;
+    transition: all 0.25s ease;
+  }
+
+  .btn-outline:hover { background: var(--antique-brown); color: var(--off-white); }
+
+  /* ─── SERVICES ─── */
+  .services-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+    gap: 20px;
+  }
+
+  .service-card {
+    padding: 32px 28px;
+  }
+
+  .service-icon {
+    width: 48px; height: 48px;
+    background: rgba(184,150,74,0.1);
+    border: 1px solid rgba(184,150,74,0.2);
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 20px;
+    font-size: 22px;
+  }
+
+  .service-title {
+    font-family: var(--font-display);
+    font-size: 18px;
+    font-weight: 500;
+    color: var(--deep-mahogany);
+    margin-bottom: 10px;
+  }
+
+  .service-desc {
+    font-family: var(--font-body);
+    font-size: 13px;
+    font-weight: 300;
+    color: var(--text-mid);
+    line-height: 1.7;
+  }
+
+  /* ─── BROKER SPOTLIGHT ─── */
+
+
+
+
+
+
+
+
+
+  .stars { color: var(--antique-gold); font-size: 12px; margin-bottom: 16px; }
+
+  /* ─── INSIGHTS ─── */
+  .insights-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+    gap: 24px;
+  }
+
+  .insight-card { padding: 32px; position: relative; overflow: hidden; }
+
+  .insight-cat {
+    font-family: var(--font-editorial);
+    font-size: 11px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: var(--antique-gold);
+    font-style: italic;
+    margin-bottom: 12px;
+    display: block;
+  }
+
+  .insight-title {
+    font-family: var(--font-display);
+    font-size: 20px;
+    font-weight: 500;
+    color: var(--deep-mahogany);
+    margin-bottom: 12px;
+    line-height: 1.3;
+  }
+
+  .insight-excerpt {
+    font-family: var(--font-body);
+    font-size: 13px;
+    font-weight: 300;
+    color: var(--text-mid);
+    line-height: 1.7;
+    margin-bottom: 20px;
+  }
+
+  .insight-footer {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding-top: 16px;
+    border-top: 1px solid rgba(196,168,130,0.2);
+  }
+
+  .insight-date { font-family: var(--font-body); font-size: 11px; color: var(--warm-tan); }
+
+  /* ─── CTA BANNER ─── */
+  .cta-banner {
+    background: linear-gradient(135deg, var(--deep-mahogany), #2a1f18);
+    padding: 80px 60px;
+    text-align: center;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .cta-banner::before {
+    content: '';
+    position: absolute;
+    top: -50%;
+    left: -20%;
+    width: 60%;
+    height: 200%;
+    background: radial-gradient(ellipse, rgba(200,216,228,0.08) 0%, transparent 60%);
+    pointer-events: none;
+  }
+
+  .cta-banner::after {
+    content: '';
+    position: absolute;
+    bottom: -50%;
+    right: -20%;
+    width: 60%;
+    height: 200%;
+    background: radial-gradient(ellipse, rgba(184,150,74,0.1) 0%, transparent 60%);
+    pointer-events: none;
+  }
+
+  .cta-banner h2 {
+    font-family: var(--font-display);
+    font-size: clamp(32px, 4vw, 48px);
+    font-weight: 400;
+    color: var(--off-white);
+    margin-bottom: 16px;
+    position: relative;
+    z-index: 1;
+  }
+
+  .cta-banner h2 em { font-style: italic; color: var(--warm-gold); }
+
+  .cta-banner p {
+    font-family: var(--font-editorial);
+    font-size: 18px;
+    font-weight: 300;
+    font-style: italic;
+    color: rgba(250,247,242,0.65);
+    margin-bottom: 40px;
+    position: relative;
+    z-index: 1;
+  }
+
+  .cta-banner-btns {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 16px;
+    position: relative;
+    z-index: 1;
+  }
+
+  /* ─── LOGIN MODAL ─── */
+  .modal-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(74,55,40,0.3);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    z-index: 2000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.3s;
+  }
+
+  .modal-overlay.open { opacity: 1; pointer-events: all; }
+
+  .login-modal {
+    background: rgba(250,247,242,0.92);
+    backdrop-filter: blur(40px) saturate(180%);
+    -webkit-backdrop-filter: blur(40px) saturate(180%);
+    border: 1px solid rgba(255,255,255,0.85);
+    border-radius: 24px;
+    box-shadow: 0 32px 80px rgba(74,55,40,0.2), inset 0 1px 0 rgba(255,255,255,0.9);
+    padding: 48px 44px;
+    width: 440px;
+    max-width: 95vw;
+    transform: translateY(20px) scale(0.97);
+    transition: transform 0.3s ease;
+  }
+
+  .modal-overlay.open .login-modal { transform: translateY(0) scale(1); }
+
+  .modal-title {
+    font-family: var(--font-display);
+    font-size: 28px;
+    font-weight: 400;
+    color: var(--deep-mahogany);
+    margin-bottom: 6px;
+  }
+
+  .modal-sub {
+    font-family: var(--font-editorial);
+    font-size: 15px;
+    font-style: italic;
+    color: var(--antique-brown);
+    margin-bottom: 28px;
+  }
+
+  .user-types {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+    margin-bottom: 28px;
+  }
+
+  .user-type-btn {
+    font-family: var(--font-body);
+    font-size: 12px;
+    letter-spacing: 0.5px;
+    color: var(--antique-brown);
+    background: rgba(255,255,255,0.6);
+    border: 1.5px solid rgba(196,168,130,0.35);
+    border-radius: 10px;
+    padding: 12px;
+    cursor: pointer;
+    transition: all 0.2s;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .user-type-btn:hover, .user-type-btn.active {
+    border-color: var(--antique-gold);
+    background: rgba(212,176,106,0.1);
+    color: var(--deep-mahogany);
+  }
+
+  .form-group { margin-bottom: 18px; }
+
+  .form-label {
+    font-family: var(--font-body);
+    font-size: 10px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: var(--antique-brown);
+    display: block;
+    margin-bottom: 8px;
+  }
+
+  .form-input {
+    width: 100%;
+    font-family: var(--font-body);
+    font-size: 14px;
+    color: var(--deep-mahogany);
+    background: rgba(255,255,255,0.6);
+    border: 1.5px solid rgba(196,168,130,0.3);
+    border-radius: 10px;
+    padding: 12px 16px;
+    outline: none;
+    transition: border-color 0.2s, box-shadow 0.2s;
+  }
+
+  .form-input:focus {
+    border-color: var(--antique-gold);
+    box-shadow: 0 0 0 3px rgba(184,150,74,0.15);
+  }
+
+  .btn-signin {
+    width: 100%;
+    font-family: var(--font-body);
+    font-size: 11px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: var(--off-white);
+    background: linear-gradient(135deg, var(--antique-brown), var(--deep-mahogany));
+    border: none;
+    border-radius: 10px;
+    padding: 14px;
+    cursor: pointer;
+    transition: all 0.25s;
+    margin-bottom: 16px;
+    box-shadow: 0 4px 16px rgba(74,55,40,0.2);
+  }
+
+  .btn-signin:hover { transform: translateY(-1px); box-shadow: 0 8px 24px rgba(74,55,40,0.3); }
+
+  .or-divider {
+    text-align: center;
+    font-family: var(--font-body);
+    font-size: 12px;
+    color: var(--warm-tan);
+    margin-bottom: 16px;
+    position: relative;
+  }
+
+  .or-divider::before, .or-divider::after {
+    content: '';
+    position: absolute;
+    top: 50%;
+    width: calc(50% - 24px);
+    height: 1px;
+    background: rgba(196,168,130,0.25);
+  }
+
+  .or-divider::before { left: 0; }
+  .or-divider::after { right: 0; }
+
+  .btn-google {
+    width: 100%;
+    font-family: var(--font-body);
+    font-size: 11px;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    color: var(--antique-brown);
+    background: rgba(255,255,255,0.6);
+    border: 1.5px solid rgba(196,168,130,0.3);
+    border-radius: 10px;
+    padding: 13px;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+
+  .btn-google:hover { background: rgba(255,255,255,0.85); border-color: rgba(196,168,130,0.5); }
+
+  .modal-close {
+    position: absolute;
+    top: 20px; right: 20px;
+    width: 32px; height: 32px;
+    background: rgba(255,255,255,0.5);
+    border: 1px solid rgba(196,168,130,0.25);
+    border-radius: 50%;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 16px;
+    color: var(--antique-brown);
+    transition: all 0.2s;
+  }
+
+  .modal-close:hover { background: rgba(255,255,255,0.8); }
+  .login-modal { position: relative; }
+
+  /* ─── WHATSAPP ─── */
+
+
+  /* ─── FOOTER ─── */
+
+
+
+
+
+
+
+
+
+
+
+  /* ─── ANIMATIONS ─── */
+
+
+
+  /* ─── MOBILE MENU ─── */
+
+
+
+  /* ─── RESPONSIVE ─── */
+
+  /* Below this width the three cards can't hold a readable column each,
+     so they become a swipeable row rather than shrinking further. */
+  @media (max-width: 1024px) {
+    .hero-bottom { grid-template-columns: 1fr; gap: 36px; align-items: start; }
+    .hero-featured { max-width: 100%; margin-left: 0; }
+    .hero-stats { grid-template-columns: repeat(4, max-content); gap: 20px 34px; }
+  }
+
+  @media (max-width: 768px) {
+    .hero { padding: 120px 24px 70px; }
+    .hero-inner { gap: 36px; }
+    .hero-bottom { gap: 30px; }
+    .hero-stats { grid-template-columns: repeat(2, 1fr); gap: 18px 20px; }
+    .stat-num { font-size: 24px; }
+    section { padding: 60px 24px; }
+    .listings-section > div { padding: 60px 24px; }
+    .cta-banner { padding: 60px 24px; }
+    .hero-ctas { flex-direction: column; align-items: stretch; width: 100%; }
+    .hero-ctas a { text-align: center; }
+    .scroll-arrow { display: none; }
+
+    .hero-featured {
+      display: flex;
+      gap: 14px;
+      overflow-x: auto;
+      scroll-snap-type: x mandatory;
+      -webkit-overflow-scrolling: touch;
+      padding-bottom: 8px;
+      margin-inline: -24px;
+      padding-inline: 24px;
+    }
+    .feat-card { flex: 0 0 76%; scroll-snap-align: start; }
+  }
+
+  /* ─── CALCULATOR WIDGET ─── */
+  .calc-widget {
+    background: rgba(245,240,232,0.55);
+    backdrop-filter: blur(20px) saturate(160%);
+    -webkit-backdrop-filter: blur(20px) saturate(160%);
+    border: 1px solid rgba(255,255,255,0.70);
+    border-radius: 20px;
+    box-shadow: inset 0 1px 0 rgba(255,255,255,0.85), 0 8px 32px rgba(139,111,78,0.08);
+    padding: 40px;
+    max-width: 600px;
+    margin: 0 auto;
+  }
+
+  .calc-inputs {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+    margin-bottom: 24px;
+  }
+
+  .calc-result {
+    background: linear-gradient(135deg, var(--deep-mahogany), #2a1f18);
+    border-radius: 16px;
+    padding: 28px;
+    color: var(--off-white);
+    margin-top: 20px;
+    display: none;
+  }
+
+  .calc-result.visible { display: block; }
+
+  .calc-result-num {
+    font-family: var(--font-display);
+    font-size: 36px;
+    color: var(--warm-gold);
+    display: block;
+    margin-bottom: 4px;
+  }
+
+  .calc-result-label {
+    font-family: var(--font-body);
+    font-size: 11px;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    color: rgba(250,247,242,0.5);
+  }
+
+  .calc-row { display: flex; justify-content: space-between; align-items: center; margin-top: 12px; padding-top: 12px; border-top: 1px solid rgba(200,168,130,0.15); }
+  .calc-row-label { font-family: var(--font-body); font-size: 12px; color: rgba(250,247,242,0.5); }
+  .calc-row-val { font-family: var(--font-display); font-size: 16px; color: rgba(250,247,242,0.9); }
+</style>
+<script src="assets/api.js" defer></script>
+<script src="assets/demo-data.js" defer></script>
+<script src="assets/site.js" defer></script>
+<script src="assets/bpsf-store.js" defer></script>
+</head>
+<body>
+
+<!-- ─── LIQUID GLASS NAVBAR ─── -->
+<nav class="navbar" id="navbar">
+  <a href="index.html" class="nav-logo">Buy Per Sq<span>·</span>Ft</a>
+  <ul class="nav-links">
+    <li><a href="index.html" class="active">Home</a></li>
+    <li><a href="warehouses.html">Warehouses</a></li>
+    <li><a href="land-parks.html">Land &amp; Parks</a></li>
+    <li><a href="insights.html">Insights</a></li>
+    <li><a href="calculator.html">Calculator</a></li>
+    <li><a href="partners.html">Partners</a></li>
+    <li><a href="about.html">About</a></li>
+    <li><a href="contact.html">Contact</a></li>
+  </ul>
+  <div class="nav-actions">
+    <a href="login.html" class="btn-login">Login</a>
+    <a href="submit-listing.html" class="btn-cta-nav">List Property</a>
+    <div class="hamburger" onclick="toggleMenu()" id="hamburger">
+      <span></span><span></span><span></span>
+    </div>
+  </div>
+</nav>
+
+<!-- Mobile Menu -->
+<div class="mobile-menu" id="mobileMenu">
+  <ul>
+    <li><a href="index.html" onclick="toggleMenu()">Home</a></li>
+    <li><a href="warehouses.html" onclick="toggleMenu()">Warehouses</a></li>
+    <li><a href="land-parks.html" onclick="toggleMenu()">Land &amp; Parks</a></li>
+    <li><a href="insights.html" onclick="toggleMenu()">Insights</a></li>
+    <li><a href="calculator.html" onclick="toggleMenu()">Calculator</a></li>
+    <li><a href="partners.html" onclick="toggleMenu()">Partners</a></li>
+    <li><a href="about.html" onclick="toggleMenu()">About</a></li>
+    <li><a href="contact.html" onclick="toggleMenu()">Contact</a></li>
+  </ul>
+</div>
+
+<!-- ─── HERO ─── -->
+<section style="padding: 0; max-width: 100%;">
+  <div class="hero">
+    <!-- ─── HERO BACKDROP ───────────────────────────────────────
+         Illustrated countryside scene. To use a photograph instead, drop
+         it in client/assets/ and set --hero-photo on .hero-bg (see the CSS);
+         the SVG hides itself automatically and the wash + dot overlays stay. -->
+    <div class="hero-bg has-photo" id="heroBg">
+      <svg class="hero-scene" viewBox="0 0 1440 760" preserveAspectRatio="xMidYMax slice" aria-hidden="true" focusable="false">
+        <defs>
+          <linearGradient id="hSky" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0" stop-color="#A6C9E3"/>
+            <stop offset=".5" stop-color="#D3E5EE"/>
+            <stop offset="1" stop-color="#EEF3E9"/>
+          </linearGradient>
+          <linearGradient id="hFar" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0" stop-color="#C3D6B6"/>
+            <stop offset="1" stop-color="#A5BE9C"/>
+          </linearGradient>
+          <linearGradient id="hMeadow" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0" stop-color="#BACB92"/>
+            <stop offset=".4" stop-color="#9FB679"/>
+            <stop offset="1" stop-color="#7C985C"/>
+          </linearGradient>
+          <radialGradient id="hSun" cx=".15" cy=".18" r=".55">
+            <stop offset="0" stop-color="#fff" stop-opacity=".95"/>
+            <stop offset=".45" stop-color="#FFFCF2" stop-opacity=".45"/>
+            <stop offset="1" stop-color="#fff" stop-opacity="0"/>
+          </radialGradient>
+        </defs>
+
+        <rect width="1440" height="760" fill="url(#hSky)"/>
+        <ellipse cx="430" cy="148" rx="270" ry="44" fill="#fff" opacity=".45"/>
+        <ellipse cx="910" cy="108" rx="230" ry="36" fill="#fff" opacity=".34"/>
+        <ellipse cx="1240" cy="176" rx="180" ry="30" fill="#fff" opacity=".28"/>
+
+        <!-- far hills -->
+        <path d="M0 432C180 398 330 420 520 406s340 24 510 10 300 18 410 10v60H0z" fill="url(#hFar)"/>
+
+        <!-- woodland, heavier to the right -->
+        <path d="M628 430c26-24 54-8 74-28s48-6 70-26 52-4 74-22 56-2 80-18 60 2 86-12 58 6 84-6v104H628z" fill="#51724A"/>
+        <path d="M968 404c30-28 62-10 88-32s58-4 84-24 62 0 90-18 64 6 98-8v122H968z" fill="#3E5D38"/>
+
+        <!-- the unit -->
+        <g>
+          <rect x="1002" y="430" width="234" height="60" rx="2" fill="#3B494D"/>
+          <rect x="998" y="424" width="242" height="9" rx="3" fill="#5C6D72"/>
+          <rect x="1190" y="433" width="46" height="57" fill="#C6A268" opacity=".9"/>
+          <rect x="1024" y="448" width="32" height="42" fill="#717F83"/>
+          <rect x="1070" y="448" width="32" height="42" fill="#717F83"/>
+          <rect x="1116" y="448" width="32" height="42" fill="#717F83"/>
+        </g>
+
+        <!-- meadow -->
+        <path d="M0 464C240 454 520 488 760 502s460-6 680-16v274H0z" fill="url(#hMeadow)"/>
+
+        <!-- track up to the unit -->
+        <path d="M986 494c-84 48-146 112-182 214-14 32-20 40-24 52h104c8-42 34-118 86-180 30-36 52-62 68-84z" fill="#DBCEAB" opacity=".8"/>
+
+        <!-- foreground wildflowers -->
+        <g opacity=".75">
+          <circle cx="150" cy="690" r="5" fill="#C9629B"/><circle cx="196" cy="720" r="4" fill="#E0574F"/>
+          <circle cx="258" cy="674" r="4" fill="#8E7BC4"/><circle cx="330" cy="716" r="5" fill="#E0574F"/>
+          <circle cx="404" cy="686" r="4" fill="#C9629B"/><circle cx="486" cy="726" r="4" fill="#8E7BC4"/>
+          <circle cx="560" cy="700" r="5" fill="#E0574F"/><circle cx="642" cy="732" r="4" fill="#C9629B"/>
+        </g>
+
+        <rect width="1440" height="760" fill="url(#hSun)"/>
+      </svg>
+
+      <div class="hero-wash"></div>
+      <div class="hero-dots"></div>
+    </div>
+
+    <div class="hero-inner">
+      <div class="hero-copy">
+        <div class="hero-badge">Premium Industrial Spaces</div>
+        <h1 class="hero-h1">India's Most <em>Trusted</em><br>Warehousing Platform</h1>
+        <p class="hero-sub">Every square foot. Verified, priced, and ready. Premium warehouses, logistics parks, and industrial land — sourced, vetted, and listed for serious businesses only.</p>
+        <div class="hero-ctas">
+          <a href="warehouses.html" class="btn-hero-primary">Browse Warehouses</a>
+          <a href="submit-listing.html" class="btn-hero-secondary">List Your Property</a>
+        </div>
+
+      </div>
+
+      <div class="hero-bottom">
+        <div class="hero-stats">
+          <div class="stat-card">
+            <span class="stat-num">2,400+</span>
+            <span class="stat-label">Listings</span>
+          </div>
+          <div class="stat-card">
+            <span class="stat-num">₹240Cr+</span>
+            <span class="stat-label">Deals Closed</span>
+          </div>
+          <div class="stat-card">
+            <span class="stat-num">48</span>
+            <span class="stat-label">Cities</span>
+          </div>
+          <div class="stat-card">
+            <span class="stat-num">100%</span>
+            <span class="stat-label">Verified</span>
+          </div>
+        </div>
+
+        <div class="hero-featured">
+        <a class="feat-card" href="property-detail.html">
+          <div class="feat-photo feat-photo-1">
+            <span class="feat-tag">Grade A</span>🏢
+          </div>
+          <div>
+            <div class="feat-name">Bhiwandi Logistics Hub</div>
+            <div class="feat-loc">Bhiwandi, Mumbai MMR</div>
+          </div>
+          <div class="feat-foot">
+            <span class="feat-rate">₹28 <span>/ sq ft</span></span>
+            <span class="feat-area">45,000 sq ft</span>
+          </div>
+        </a>
+
+        <a class="feat-card" href="property-detail.html">
+          <div class="feat-photo feat-photo-2">
+            <span class="feat-tag">Cold Chain</span>❄️
+          </div>
+          <div>
+            <div class="feat-name">Chakan Cold Storage</div>
+            <div class="feat-loc">Chakan, Pune</div>
+          </div>
+          <div class="feat-foot">
+            <span class="feat-rate">₹45 <span>/ sq ft</span></span>
+            <span class="feat-area">18,000 sq ft</span>
+          </div>
+        </a>
+
+        <a class="feat-card" href="property-detail.html">
+          <div class="feat-photo feat-photo-3">
+            <span class="feat-tag">Land</span>🏗️
+          </div>
+          <div>
+            <div class="feat-name">Panvel Industrial Park</div>
+            <div class="feat-loc">Panvel, Navi Mumbai</div>
+          </div>
+          <div class="feat-foot">
+            <span class="feat-rate">₹22 <span>/ sq ft</span></span>
+            <span class="feat-area">80,000 sq ft</span>
+          </div>
+        </a>
+        </div>
+      </div>
+    </div>
+
+    <div class="scroll-arrow" onclick="document.getElementById('trust').scrollIntoView({behavior:'smooth'})">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 9l6 6 6-6"/></svg>
+    </div>
+  </div>
+</section>
+
+<!-- ─── TRUST STRIP ─── -->
+<div class="trust-strip" id="trust">
+  <div class="trust-inner" id="trustInner">
+    <span class="trust-label">Trusted By</span>
+    <span class="trust-logo">Mahindra Logistics</span><div class="trust-divider"></div>
+    <span class="trust-logo">Delhivery</span><div class="trust-divider"></div>
+    <span class="trust-logo">Welspun One</span><div class="trust-divider"></div>
+    <span class="trust-logo">IndoSpace</span><div class="trust-divider"></div>
+    <span class="trust-logo">Embassy REIT</span><div class="trust-divider"></div>
+    <span class="trust-logo">Blackstone</span><div class="trust-divider"></div>
+    <span class="trust-logo">DHL Supply</span><div class="trust-divider"></div>
+    <span class="trust-logo">Flipkart</span><div class="trust-divider"></div>
+    <span class="trust-logo">Amazon Logistics</span><div class="trust-divider"></div>
+    <!-- duplicate for seamless loop -->
+    <span class="trust-label">Trusted By</span>
+    <span class="trust-logo">Mahindra Logistics</span><div class="trust-divider"></div>
+    <span class="trust-logo">Delhivery</span><div class="trust-divider"></div>
+    <span class="trust-logo">Welspun One</span><div class="trust-divider"></div>
+    <span class="trust-logo">IndoSpace</span><div class="trust-divider"></div>
+    <span class="trust-logo">Embassy REIT</span><div class="trust-divider"></div>
+    <span class="trust-logo">Blackstone</span><div class="trust-divider"></div>
+    <span class="trust-logo">DHL Supply</span><div class="trust-divider"></div>
+    <span class="trust-logo">Flipkart</span><div class="trust-divider"></div>
+    <span class="trust-logo">Amazon Logistics</span>
+  </div>
+</div>
+
+<!-- ─── FEATURED LISTINGS ─── -->
+<div class="listings-section" id="listings">
+  <div>
+    <span class="section-label reveal">Featured Listings</span>
+    <h2 class="section-h2 reveal">Premium <em>Industrial Spaces</em></h2>
+    <p class="section-sub reveal">Hand-picked. Verified on-site. Every listing cleared our 14-point inspection protocol before it reaches you.</p>
+    <div class="listings-grid">
+      <!-- Card 1 -->
+      <div class="listing-card reveal">
+        <div class="listing-photo-inner" style="position:relative;">
+          <span style="font-size:48px;">🏭</span>
+          <div class="verified-badge">✦ BPSF Verified</div>
+        </div>
+        <div class="listing-body">
+          <div class="listing-price">₹28 <span>/ sq ft / month</span></div>
+          <div class="listing-title">Grade A Warehouse</div>
+          <div class="listing-meta">
+            <span>📍 Mumbai, Bhiwandi</span>
+            <div class="listing-divider"></div>
+            <span>45,000 sq ft</span>
+            <div class="listing-divider"></div>
+            <span style="color: var(--sage-green);">● Available Now</span>
+          </div>
+          <div class="listing-tags">
+            <span class="tag">Cold Chain Ready</span>
+            <span class="tag">FSSAI Compliant</span>
+            <span class="tag">32ft Ceiling</span>
+          </div>
+          <div class="listing-footer">
+            <button class="btn-glass" data-fav-id="home-featured" data-fav-icon data-name="Featured warehouse" data-url="property-detail.html">♡</button>
+            <button class="btn-primary" onclick="window.location='property-detail.html'">View Details →</button>
+          </div>
+        </div>
+      </div>
+      <!-- Card 2 -->
+      <div class="listing-card reveal">
+        <div class="listing-photo-inner" style="position:relative; background: linear-gradient(135deg, rgba(44,74,107,0.15), rgba(196,168,130,0.3));">
+          <span style="font-size:48px;">🏗️</span>
+          <div class="verified-badge">✦ BPSF Verified</div>
+        </div>
+        <div class="listing-body">
+          <div class="listing-price">₹18 <span>/ sq ft / month</span></div>
+          <div class="listing-title">Logistics Park — Block C</div>
+          <div class="listing-meta">
+            <span>📍 Pune, Chakan</span>
+            <div class="listing-divider"></div>
+            <span>1,20,000 sq ft</span>
+            <div class="listing-divider"></div>
+            <span style="color: var(--sage-green);">● Available</span>
+          </div>
+          <div class="listing-tags">
+            <span class="tag">Multi-tenant</span>
+            <span class="tag">6 Docks</span>
+            <span class="tag">EV Charging</span>
+          </div>
+          <div class="listing-footer">
+            <button class="btn-glass" data-fav-id="home-featured" data-fav-icon data-name="Featured warehouse" data-url="property-detail.html">♡</button>
+            <button class="btn-primary" onclick="window.location='property-detail.html'">View Details →</button>
+          </div>
+        </div>
+      </div>
+      <!-- Card 3 -->
+      <div class="listing-card reveal">
+        <div class="listing-photo-inner" style="position:relative; background: linear-gradient(135deg, rgba(154,175,155,0.2), rgba(200,216,228,0.4));">
+          <span style="font-size:48px;">🏢</span>
+          <div class="verified-badge">✦ BPSF Verified</div>
+        </div>
+        <div class="listing-body">
+          <div class="listing-price">₹42 <span>/ sq ft / month</span></div>
+          <div class="listing-title">Premium Dark Store</div>
+          <div class="listing-meta">
+            <span>📍 Delhi, Gurugram</span>
+            <div class="listing-divider"></div>
+            <span>8,000 sq ft</span>
+            <div class="listing-divider"></div>
+            <span style="color: var(--antique-gold);">● Closing Soon</span>
+          </div>
+          <div class="listing-tags">
+            <span class="tag">Last Mile</span>
+            <span class="tag">Ground Floor</span>
+            <span class="tag">24/7 Security</span>
+          </div>
+          <div class="listing-footer">
+            <button class="btn-glass" data-fav-id="home-featured" data-fav-icon data-name="Featured warehouse" data-url="property-detail.html">♡</button>
+            <button class="btn-primary" onclick="window.location='property-detail.html'">View Details →</button>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div style="text-align:center; margin-top: 48px;" class="reveal">
+      <button class="btn-gold" onclick="window.location='warehouses.html'">Explore All Warehouses ✦</button>
+    </div>
+  </div>
+</div>
+
+<!-- ─── SERVICES ─── -->
+<section id="services">
+  <span class="section-label reveal">What We Offer</span>
+  <h2 class="section-h2 reveal">Everything Industrial,<br><em>Under One Roof</em></h2>
+  <p class="section-sub reveal">From discovery to deal closure — BPSF is the only platform built exclusively for India's industrial real estate market.</p>
+  <div class="services-grid">
+    <div class="glass-card service-card reveal">
+      <div class="service-icon">🏭</div>
+      <div class="service-title">Warehouse Listings</div>
+      <p class="service-desc">Grade A & B warehouses from 2,000–5,00,000 sq ft across 48 cities. Every listing verified on-site by our team.</p>
+    </div>
+    <div class="glass-card service-card reveal">
+      <div class="service-icon">🗺️</div>
+      <div class="service-title">Industrial Land</div>
+      <p class="service-desc">Raw parcels, SEZ plots, and MIDC zones. Built-to-suit enquiry routed to the right developer partners.</p>
+    </div>
+    <div class="glass-card service-card reveal">
+      <div class="service-icon">🤝</div>
+      <div class="service-title">Verified Brokers</div>
+      <p class="service-desc">BPSF Elite Brokers — background checked, deal-history verified, and rated by real clients. No middlemen fog.</p>
+    </div>
+    <div class="glass-card service-card reveal">
+      <div class="service-icon">📊</div>
+      <div class="service-title">Market Intelligence</div>
+      <p class="service-desc">Quarterly reports on per-sq-ft lease rates, supply indices, and demand trends across all major logistics corridors.</p>
+    </div>
+  </div>
+</section>
+
+<!-- ─── PRICE CALCULATOR ─── -->
+<div style="background: linear-gradient(135deg, rgba(200,216,228,0.15), rgba(245,240,232,0.4)); border-top: 1px solid rgba(200,168,130,0.15);">
+  <section id="calculator">
+    <span class="section-label reveal">Instant Estimate</span>
+    <h2 class="section-h2 reveal">Per Sq Ft <em>Calculator</em></h2>
+    <p class="section-sub reveal">Get a real-time estimate of your monthly lease cost, total deal value, and brokerage fee — before you speak to anyone.</p>
+    <div class="calc-widget reveal">
+      <div class="calc-inputs">
+        <div class="form-group">
+          <label class="form-label">City</label>
+          <select class="form-input" id="calcCity" onchange="calcUpdate()">
+            <option value="mumbai">Mumbai</option>
+            <option value="delhi">Delhi NCR</option>
+            <option value="pune">Pune</option>
+            <option value="bengaluru">Bengaluru</option>
+            <option value="hyderabad">Hyderabad</option>
+            <option value="chennai">Chennai</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Warehouse Type</label>
+          <select class="form-input" id="calcType" onchange="calcUpdate()">
+            <option value="grade_a">Grade A</option>
+            <option value="grade_b">Grade B</option>
+            <option value="cold_chain">Cold Chain</option>
+            <option value="dark_store">Dark Store</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Area (sq ft)</label>
+          <input type="number" class="form-input" id="calcArea" placeholder="e.g. 50000" oninput="calcUpdate()">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Lease Duration</label>
+          <select class="form-input" id="calcDuration" onchange="calcUpdate()">
+            <option value="12">12 months</option>
+            <option value="24">24 months</option>
+            <option value="36">36 months</option>
+            <option value="60">60 months</option>
+          </select>
+        </div>
+      </div>
+      <button class="btn-primary" style="border-radius:8px; width:100%; padding:13px; font-size:11px; letter-spacing:2px;" onclick="calcCompute()">Calculate Estimate →</button>
+      <div class="calc-result" id="calcResult">
+        <span class="calc-result-num" id="calcMonthly">₹0</span>
+        <span class="calc-result-label">Estimated Monthly Lease</span>
+        <div class="calc-row">
+          <span class="calc-row-label">Total Deal Value</span>
+          <span class="calc-row-val" id="calcTotal">₹0</span>
+        </div>
+        <div class="calc-row">
+          <span class="calc-row-label">Brokerage Fee (est.)</span>
+          <span class="calc-row-val" id="calcBrokerage">₹0</span>
+        </div>
+        <div class="calc-row">
+          <span class="calc-row-label">Market Rate Comparison</span>
+          <span class="calc-row-val" style="color: var(--sage-green);">✓ Fair Market Rate</span>
+        </div>
+        <div style="margin-top: 20px;">
+          <button class="btn-gold" style="width:100%;" onclick="window.location='contact.html'">Talk to Our Team →</button>
+        </div>
+      </div>
+    </div>
+  </section>
+</div>
+
+<!-- ─── MARKET INSIGHTS ─── -->
+<section id="insights">
+  <span class="section-label reveal">Market Intelligence</span>
+  <h2 class="section-h2 reveal">Latest <em>Industry Reports</em></h2>
+  <p class="section-sub reveal">Quarterly data on per-sq-ft lease rates, corridor demand, and investment flows — written for serious operators.</p>
+  <div class="insights-grid">
+    <div class="glass-card insight-card reveal">
+      <span class="insight-cat">Q1 2026 Report</span>
+      <div class="insight-title">Lease Rates Rise 12% Across Top 6 Logistics Corridors</div>
+      <p class="insight-excerpt">Per-sq-ft lease rates climbed 12% quarter-on-quarter in Mumbai, Pune, Delhi NCR, Bengaluru, Hyderabad, and Chennai — driven by constrained Grade A supply.</p>
+      <div class="insight-footer">
+        <span class="insight-date">March 2026</span>
+        <button class="btn-outline" style="padding: 7px 18px; font-size:10px;" onclick="window.location='insights.html'">Read Report</button>
+      </div>
+    </div>
+    <div class="glass-card insight-card reveal">
+      <span class="insight-cat">Analysis</span>
+      <div class="insight-title">Cold Chain Warehousing: The ₹8,000 Cr Opportunity</div>
+      <p class="insight-excerpt">India's cold chain infrastructure deficit is creating rare investment windows. We map the whitespace across 18 Tier 2 cities with growth indices.</p>
+      <div class="insight-footer">
+        <span class="insight-date">February 2026</span>
+        <button class="btn-outline" style="padding: 7px 18px; font-size:10px;" onclick="window.location='insights.html'">Read Report</button>
+      </div>
+    </div>
+    <div class="glass-card insight-card reveal">
+      <span class="insight-cat">City Focus</span>
+      <div class="insight-title">Bhiwandi vs. Panvel: Mumbai's Two Warehouse Capitals</div>
+      <p class="insight-excerpt">A side-by-side analysis of Mumbai's two primary warehousing corridors — infrastructure, connectivity, compliance history, and 5-year rate trends.</p>
+      <div class="insight-footer">
+        <span class="insight-date">January 2026</span>
+        <button class="btn-outline" style="padding: 7px 18px; font-size:10px;" onclick="window.location='insights.html'">Read Report</button>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ─── CTA BANNER ─── -->
+<div class="cta-banner">
+  <h2>List Your <em>Industrial Property</em></h2>
+  <p>Reach India's most serious warehouse buyers and tenants. Zero listing fee to start.</p>
+  <div class="cta-banner-btns">
+    <button class="btn-gold" onclick="window.location='submit-listing.html'">List Your Property ✦</button>
+    <a href="about.html" class="btn-hero-secondary" style="border-color:rgba(255,255,255,0.3); color:rgba(250,247,242,0.7);">Learn More</a>
+  </div>
+</div>
+
+<!-- ─── FOOTER ─── -->
+<footer class="footer">
+  <div class="footer-grid">
+    <div>
+      <div class="footer-brand-name">Buy Per Sq<span>·</span>Ft</div>
+      <p class="footer-desc">India's most trusted marketplace for industrial and warehousing real estate. Every square foot, verified.</p>
+    </div>
+    <div>
+      <div class="footer-col-title">Properties</div>
+      <ul class="footer-links">
+        <li><a href="warehouses.html">Warehouses</a></li>
+        <li><a href="land-parks.html">Industrial Land</a></li>
+        <li><a href="land-parks.html">Logistics Parks</a></li>
+        <li><a href="warehouses.html">Cold Storage</a></li>
+      </ul>
+    </div>
+    <div>
+      <div class="footer-col-title">Company</div>
+      <ul class="footer-links">
+        <li><a href="about.html">About BPSF</a></li>
+        <li><a href="partners.html">Partners</a></li>
+        <li><a href="insights.html">Market Insights</a></li>
+        <li><a href="contact.html">Contact</a></li>
+      </ul>
+    </div>
+    <div>
+      <div class="footer-col-title">Account</div>
+      <ul class="footer-links">
+        <li><a href="login.html">Login</a></li>
+        <li><a href="register.html">Register</a></li>
+        <li><a href="submit-listing.html">List Property</a></li>
+        <li><a href="terms.html">Terms of Service</a></li>
+        <li><a href="privacy.html">Privacy Policy</a></li>
+      </ul>
+    </div>
+  </div>
+  <div class="footer-bottom">
+    <span class="footer-copy">© 2026 Buy Per Square Foot Pvt Ltd. All rights reserved.</span>
+    <span class="footer-copy">Made with ✦ in India</span>
+  </div>
+</footer>
+
+<!-- ─── LOGIN MODAL ─── -->
+<div class="modal-overlay" id="loginModal" onclick="closeModalOutside(event)">
+  <div class="login-modal">
+    <div class="modal-close" onclick="closeModal()">✕</div>
+    <div class="modal-title">Welcome Back</div>
+    <div class="modal-sub">Sign in to your BPSF account</div>
+    <div class="user-types">
+      <button class="user-type-btn active" onclick="setUserType(this)">🏢 Buyer</button>
+      <button class="user-type-btn" onclick="setUserType(this)">🏭 Owner</button>
+      <button class="user-type-btn" onclick="setUserType(this)">🤝 Broker</button>
+      <button class="user-type-btn" onclick="setUserType(this)">🏛️ Agency</button>
+    </div>
+    <div class="form-group">
+      <label class="form-label">Email Address</label>
+      <input type="email" class="form-input" placeholder="you@company.com">
+    </div>
+    <div class="form-group">
+      <label class="form-label">Password</label>
+      <input type="password" class="form-input" placeholder="••••••••">
+    </div>
+    <button class="btn-signin" onclick="window.location='login.html'">Sign In →</button>
+    <div class="or-divider">or</div>
+    <button class="btn-google" onclick="window.location='login.html'">Continue with Google</button>
+  </div>
+</div>
+
+<!-- ─── WHATSAPP ─── -->
+<a href="https://wa.me/919999999999?text=Hi%2C%20I%20found%20a%20listing%20on%20BPSF%20and%20would%20like%20more%20info." class="wa-btn" target="_blank" title="Chat on WhatsApp">
+  <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+    <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/>
+  </svg>
+</a>
+
+<script>
+  // Navbar scroll, mobile menu and scroll reveal live in assets/site.js
+
+  // Modal
+  function openModal(e) { e.preventDefault(); document.getElementById('loginModal').classList.add('open'); }
+  function closeModal() { document.getElementById('loginModal').classList.remove('open'); }
+  function closeModalOutside(e) { if (e.target === document.getElementById('loginModal')) closeModal(); }
+
+  function setUserType(btn) {
+    document.querySelectorAll('.user-type-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+  }
+
+  // Calculator
+  const rates = {
+    mumbai:    { grade_a: 28, grade_b: 18, cold_chain: 45, dark_store: 55 },
+    delhi:     { grade_a: 32, grade_b: 22, cold_chain: 50, dark_store: 60 },
+    pune:      { grade_a: 22, grade_b: 14, cold_chain: 38, dark_store: 45 },
+    bengaluru: { grade_a: 30, grade_b: 20, cold_chain: 48, dark_store: 58 },
+    hyderabad: { grade_a: 20, grade_b: 13, cold_chain: 35, dark_store: 42 },
+    chennai:   { grade_a: 22, grade_b: 15, cold_chain: 36, dark_store: 44 },
+  };
+
+  function fmt(n) {
+    if (n >= 10000000) return '₹' + (n/10000000).toFixed(2) + ' Cr';
+    if (n >= 100000) return '₹' + (n/100000).toFixed(1) + ' L';
+    return '₹' + n.toLocaleString('en-IN');
+  }
+
+  function calcUpdate() { document.getElementById('calcResult').classList.remove('visible'); }
+
+  function calcCompute() {
+    const city = document.getElementById('calcCity').value;
+    const type = document.getElementById('calcType').value;
+    const area = parseFloat(document.getElementById('calcArea').value) || 0;
+    const dur = parseInt(document.getElementById('calcDuration').value);
+    if (!area) { alert('Please enter an area in sq ft'); return; }
+    const rate = rates[city][type];
+    const monthly = area * rate;
+    const total = monthly * dur;
+    const brokerage = total * 0.02;
+    document.getElementById('calcMonthly').textContent = fmt(monthly);
+    document.getElementById('calcTotal').textContent = fmt(total);
+    document.getElementById('calcBrokerage').textContent = fmt(brokerage);
+    document.getElementById('calcResult').classList.add('visible');
+  }
+</script>
+</body>
+</html>

@@ -1,0 +1,29 @@
+# ── Secrets ───────────────────────────────────────────────
+# Never commit real settings files. Only .env.example belongs in git.
+# The glob is deliberately wide: this project has already produced .env, a
+# dot-less "env" (cPanel File Manager strips the dot), and an "api.env".
+# Matching only the names we have seen would miss the next variant.
+*.env
+.env
+.env.*
+!.env.example
+env
+*env.bak
+
+# ── Build output that carries secrets ─────────────────────
+# The upload zips bundle server/env. Do not commit them.
+dist/
+
+# ── Dependencies ──────────────────────────────────────────
+node_modules/
+
+# ── Runtime / uploads ─────────────────────────────────────
+logs/
+*.log
+deploy/public/uploads/
+godaddy-upload/public/uploads/
+
+# ── OS / editor noise ─────────────────────────────────────
+.DS_Store
+._*
+.claude/

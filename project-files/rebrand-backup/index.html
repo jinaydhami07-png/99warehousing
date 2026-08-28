@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<meta charset="utf-8">
+<title>Buy Per Square Foot</title>
+<!--
+  Entry point for static hosting (GitHub Pages, Netlify, S3).
+
+  GitHub Pages can only publish from the repository root or /docs — it cannot
+  be pointed at /public. The site itself lives in public/ so that the Express
+  server has one clearly-bounded directory to serve (keeping server/ off the
+  web), so this file bridges the two: land on the repo root, get sent to the
+  real front page.
+
+  Both a meta refresh and a script are used on purpose — the script is
+  instant, and the meta refresh still works if scripting is disabled.
+-->
+<link rel="canonical" href="public/index.html">
+<meta http-equiv="refresh" content="0; url=public/index.html">
+<script>location.replace('public/index.html' + location.search + location.hash);</script>
+<p style="font-family:system-ui,sans-serif;padding:2rem">
+  Redirecting to <a href="public/index.html">Buy Per Square Foot</a>…
+</p>

@@ -1,0 +1,551 @@
+/* ============================================================
+   Buy Per Square Foot — shared site chrome
+   Design tokens, reset, navbar, mobile menu, footer, utilities.
+   Page-specific styles stay inline in each page's <style> block.
+   ============================================================ */
+
+:root {
+  /* Neutrals */
+  --off-white: #FAF7F2;
+  --warm-cream: #F5F0E8;
+  --linen-beige: #E8DDD0;
+  --warm-tan: #C4A882;
+  --antique-brown: #8B6F4E;
+  --deep-mahogany: #4A3728;
+  --text-mid: #6B5744;
+  /* Accents */
+  --powder-blue: #C8D8E4;
+  --dusty-steel: #8BA3B8;
+  --deep-indigo: #2C4A6B;
+  --antique-gold: #B8964A;
+  --warm-gold: #D4B06A;
+  --sage-green: #9AAF9B;
+  /* Type */
+  --font-display: 'Playfair Display', Georgia, serif;
+  --font-editorial: 'Cormorant Garamond', Georgia, serif;
+  --font-body: 'Jost', sans-serif;
+}
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+html { scroll-behavior: smooth; }
+
+body {
+  font-family: var(--font-body);
+  background: var(--off-white);
+  color: var(--deep-mahogany);
+  overflow-x: hidden;
+}
+
+/* ─── NAVBAR ─── */
+.navbar {
+  position: fixed;
+  top: 20px;
+  left: 40px;
+  right: 40px;
+  z-index: 1000;
+  border-radius: 100px;
+
+  /* Matte liquid glass.
+     Tuned for cheap compositing: the fill is near-opaque, so a small blur
+     radius still reads as frosted. No saturate() pass, and the blur radius
+     is fixed — animating it would re-rasterize the backdrop on every scroll
+     frame, which is what made the old 28px→40px version expensive. */
+  background-color: rgba(246,243,237,0.88);
+  background-image:
+    linear-gradient(180deg, rgba(255,255,255,0.62) 0%, rgba(255,255,255,0) 62%),
+    linear-gradient(180deg, rgba(200,216,228,0.16) 0%, rgba(232,221,208,0.10) 100%);
+  -webkit-backdrop-filter: blur(12px);
+  backdrop-filter: blur(12px);
+
+  border: 1px solid rgba(255,255,255,0.66);
+  border-bottom-color: rgba(139,111,78,0.10);
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,0.92),
+    inset 0 -1px 0 rgba(139,111,78,0.045),
+    0 4px 18px rgba(74,55,40,0.07);
+
+  padding: 14px 28px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 20px;
+
+  /* Only compositor-cheap properties animate — never backdrop-filter. */
+  transition: background-color 0.35s ease, box-shadow 0.35s ease;
+}
+
+/* Applied by site.js once the page scrolls past 50px.
+   Deepens the matte fill only — the blur is untouched, so scrolling stays smooth. */
+.navbar.scrolled {
+  background-color: rgba(244,240,233,0.96);
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,0.98),
+    inset 0 -1px 0 rgba(139,111,78,0.05),
+    0 6px 22px rgba(74,55,40,0.11);
+}
+
+/* No backdrop-filter support: fall back to an opaque bar rather than
+   an unreadable translucent one. */
+@supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
+  .navbar { background-color: rgba(246,243,237,0.985); }
+  .navbar.scrolled { background-color: rgba(244,240,233,1); }
+}
+
+.nav-logo {
+  font-family: var(--font-display);
+  font-size: 15px;
+  font-weight: 500;
+  color: var(--deep-mahogany);
+  letter-spacing: 0.03em;
+  text-decoration: none;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+.nav-logo span { color: var(--antique-gold); }
+
+.nav-links { display: flex; align-items: center; gap: 22px; list-style: none; }
+
+.nav-links a {
+  font-family: var(--font-body);
+  font-size: 11px;
+  font-weight: 400;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+  color: var(--antique-brown);
+  text-decoration: none;
+  transition: color 0.3s;
+  position: relative;
+  white-space: nowrap;
+}
+
+.nav-links a:hover { color: var(--deep-mahogany); }
+.nav-links a.active { color: var(--deep-mahogany); }
+
+/* Underline wipes out from the centre on hover, and stays put when active. */
+.nav-links a::after {
+  content: '';
+  position: absolute;
+  bottom: -5px;
+  left: 0;
+  right: 0;
+  height: 1px;
+  background: var(--antique-gold);
+  transform: scaleX(0);
+  transform-origin: center;
+  transition: transform 0.32s cubic-bezier(0.22, 0.61, 0.36, 1);
+}
+
+.nav-links a:hover::after,
+.nav-links a:focus-visible::after { transform: scaleX(1); }
+.nav-links a.active::after { transform: scaleX(1); }
+
+/* Each link lifts a hair — reads as responsive without being noisy. */
+.nav-links a {
+  will-change: auto;
+}
+
+.nav-links a:hover { transform: translateY(-1px); }
+.nav-links a { transition: color 0.3s ease, transform 0.3s ease; }
+
+/* Gold separator in the wordmark gives a slow, quiet pulse. */
+.nav-logo span {
+  display: inline-block;
+  animation: logoPulse 3.6s ease-in-out infinite;
+}
+
+@keyframes logoPulse {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50%      { opacity: 0.55; transform: scale(1.18); }
+}
+
+/* The bar itself drops in once on load. */
+.navbar {
+  animation: navDrop 0.7s cubic-bezier(0.22, 0.61, 0.36, 1) both;
+}
+
+@keyframes navDrop {
+  from { opacity: 0; transform: translateY(-22px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+/* Nav items stagger in behind the bar. */
+.nav-links li {
+  animation: navItemIn 0.5s ease both;
+}
+
+.nav-links li:nth-child(1) { animation-delay: 0.16s; }
+.nav-links li:nth-child(2) { animation-delay: 0.21s; }
+.nav-links li:nth-child(3) { animation-delay: 0.26s; }
+.nav-links li:nth-child(4) { animation-delay: 0.31s; }
+.nav-links li:nth-child(5) { animation-delay: 0.36s; }
+.nav-links li:nth-child(6) { animation-delay: 0.41s; }
+.nav-links li:nth-child(7) { animation-delay: 0.46s; }
+.nav-links li:nth-child(8) { animation-delay: 0.51s; }
+
+@keyframes navItemIn {
+  from { opacity: 0; transform: translateY(-7px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+/* Motion is decorative here — drop all of it when asked. */
+@media (prefers-reduced-motion: reduce) {
+  .navbar,
+  .nav-links li,
+  .nav-logo span { animation: none; }
+  .nav-links a,
+  .nav-links a::after { transition: none; }
+  .nav-links a:hover { transform: none; }
+}
+
+.nav-actions { display: flex; align-items: center; gap: 10px; flex-shrink: 0; }
+
+/* ─── BUTTONS ─── */
+.btn-login {
+  font-family: var(--font-body);
+  font-size: 11px;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+  color: var(--antique-brown);
+  background: rgba(255,255,255,0.6);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid rgba(255,255,255,0.8);
+  border-radius: 100px;
+  padding: 8px 20px;
+  cursor: pointer;
+  transition: all 0.25s ease;
+  text-decoration: none;
+}
+
+.btn-login:hover {
+  background: rgba(255,255,255,0.8);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 16px rgba(74,55,40,0.1);
+}
+
+.btn-cta-nav {
+  font-family: var(--font-body);
+  font-size: 11px;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+  color: var(--off-white);
+  background: linear-gradient(135deg, var(--antique-brown), var(--deep-mahogany));
+  border: none;
+  border-radius: 100px;
+  padding: 9px 22px;
+  cursor: pointer;
+  transition: all 0.25s ease;
+  box-shadow: 0 4px 16px rgba(74,55,40,0.2);
+  text-decoration: none;
+}
+
+.btn-cta-nav:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 24px rgba(74,55,40,0.3);
+}
+
+/* ─── MOBILE MENU ─── */
+.hamburger { display: none; flex-direction: column; gap: 5px; cursor: pointer; }
+
+.hamburger span {
+  width: 22px;
+  height: 1.5px;
+  background: var(--antique-brown);
+  display: block;
+  transition: all 0.3s;
+}
+
+.mobile-menu {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  /* Matte, near-opaque — at this alpha a backdrop blur would cost a full
+     GPU pass for an effect nobody can see through it, so there isn't one. */
+  background: rgba(246,243,237,0.975);
+  border-bottom: 1px solid rgba(196,168,130,0.3);
+  padding: 100px 40px 40px;
+  z-index: 900;
+  transform: translateY(-100%);
+  transition: transform 0.4s ease;
+}
+
+.mobile-menu.open { transform: translateY(0); }
+.mobile-menu ul { list-style: none; }
+.mobile-menu ul li { margin-bottom: 20px; }
+
+.mobile-menu ul a {
+  font-family: var(--font-display);
+  font-size: 28px;
+  font-weight: 400;
+  color: var(--deep-mahogany);
+  text-decoration: none;
+}
+
+/* ─── FOOTER ─── */
+.footer {
+  background: var(--deep-mahogany);
+  color: rgba(255,255,255,0.7);
+  padding: 60px 40px 30px;
+}
+
+.footer-grid {
+  display: grid;
+  grid-template-columns: 2fr 1fr 1fr 1fr;
+  gap: 40px;
+  max-width: 1200px;
+  margin: 0 auto 40px;
+}
+
+.footer-brand-name {
+  font-family: var(--font-display);
+  font-size: 18px;
+  color: white;
+  margin-bottom: 10px;
+}
+
+.footer-brand-name span { color: var(--antique-gold); }
+
+.footer-desc { font-size: 13px; line-height: 1.75; opacity: 0.6; }
+
+.footer-col-title {
+  font-size: 10px;
+  letter-spacing: 2.5px;
+  text-transform: uppercase;
+  color: var(--antique-gold);
+  margin-bottom: 16px;
+}
+
+.footer-links { list-style: none; }
+.footer-links li { margin-bottom: 10px; }
+
+.footer-links a {
+  font-size: 13px;
+  color: rgba(255,255,255,0.6);
+  text-decoration: none;
+  transition: color 0.2s;
+}
+
+.footer-links a:hover { color: white; }
+
+.footer-bottom {
+  max-width: 1200px;
+  margin: 0 auto;
+  border-top: 1px solid rgba(255,255,255,0.08);
+  padding-top: 24px;
+  display: flex;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
+.footer-copy { font-size: 11px; color: rgba(255,255,255,0.35); }
+
+/* ─── WHATSAPP FLOAT ─── */
+/* .wa-btn takes an inline SVG; .whatsapp-bubble takes an emoji glyph. */
+.wa-btn,
+.whatsapp-bubble {
+  position: fixed;
+  bottom: 28px;
+  right: 28px;
+  z-index: 500;
+  width: 52px;
+  height: 52px;
+  background: #25D366;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 4px 16px rgba(37,211,102,0.4);
+  cursor: pointer;
+  transition: all 0.25s;
+  text-decoration: none;
+  font-size: 24px;
+}
+
+.wa-btn:hover,
+.whatsapp-bubble:hover { transform: translateY(-3px) scale(1.05); box-shadow: 0 8px 24px rgba(37,211,102,0.5); }
+
+.wa-btn svg { width: 26px; fill: white; }
+
+/* ─── FAVOURITES / COMPARE (assets/bpsf-store.js) ─── */
+
+/* Favourites count badge, sits on the nav "Saved" link */
+.nav-fav {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.fav-badge {
+  min-width: 17px;
+  height: 17px;
+  padding: 0 5px;
+  border-radius: 100px;
+  background: var(--antique-gold);
+  color: #fff;
+  font-family: var(--font-body);
+  font-size: 10px;
+  font-weight: 600;
+  line-height: 17px;
+  text-align: center;
+  font-variant-numeric: tabular-nums;
+}
+
+.fav-badge[hidden] { display: none; }
+
+/* Saved state for any heart button */
+[data-fav-id] { transition: color 0.2s ease, transform 0.2s ease; }
+[data-fav-id].saved { color: #C2453C; }
+[data-fav-id].saved:active { transform: scale(0.88); }
+
+/* Toast — announced politely, never steals focus */
+#bpsfToast {
+  position: fixed;
+  left: 50%;
+  bottom: 28px;
+  transform: translate(-50%, 16px);
+  z-index: 1200;
+  background: var(--deep-mahogany);
+  color: var(--off-white);
+  font-family: var(--font-body);
+  font-size: 12.5px;
+  letter-spacing: 0.3px;
+  padding: 11px 22px;
+  border-radius: 100px;
+  box-shadow: 0 10px 34px rgba(74,55,40,0.32);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.28s ease, transform 0.28s ease;
+}
+
+#bpsfToast.show { opacity: 1; transform: translate(-50%, 0); }
+
+@media (prefers-reduced-motion: reduce) {
+  #bpsfToast { transition: opacity 0.28s ease; transform: translate(-50%, 0); }
+}
+
+/* ─── DEMO DATA BANNER (assets/demo-data.js) ─── */
+#demoBanner {
+  position: fixed;
+  left: 16px;
+  right: 16px;
+  bottom: 16px;
+  z-index: 1100;
+  max-width: 720px;
+  margin: 0 auto;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  background: rgba(74,55,40,0.96);
+  color: rgba(250,247,242,0.92);
+  border: 1px solid rgba(184,150,74,0.4);
+  border-radius: 12px;
+  padding: 12px 16px;
+  font-family: var(--font-body);
+  font-size: 12.5px;
+  line-height: 1.55;
+  box-shadow: 0 12px 36px rgba(74,55,40,0.28);
+  animation: demoIn 0.4s ease both;
+}
+
+#demoBanner strong { color: var(--warm-gold); font-weight: 600; }
+
+#demoBanner code {
+  background: rgba(255,255,255,0.1);
+  border-radius: 4px;
+  padding: 1px 5px;
+  font-size: 11.5px;
+}
+
+#demoBanner button {
+  margin-left: auto;
+  background: none;
+  border: none;
+  color: rgba(250,247,242,0.5);
+  font-size: 14px;
+  cursor: pointer;
+  padding: 2px 4px;
+  flex-shrink: 0;
+}
+
+#demoBanner button:hover { color: white; }
+
+.demo-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: var(--warm-gold);
+  flex-shrink: 0;
+  animation: demoPulse 2s ease-in-out infinite;
+}
+
+@keyframes demoIn { from { opacity: 0; transform: translateY(12px); } to { opacity: 1; transform: translateY(0); } }
+@keyframes demoPulse { 0%,100% { opacity: 1; } 50% { opacity: 0.35; } }
+
+@media (prefers-reduced-motion: reduce) {
+  #demoBanner, .demo-dot { animation: none; }
+}
+
+@media (max-width: 560px) {
+  #demoBanner { font-size: 11.5px; align-items: flex-start; }
+}
+
+/* ─── ANIMATION UTILITIES ─── */
+@keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+
+@keyframes fadeUp {
+  from { opacity: 0; transform: translateY(24px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* Revealed by the IntersectionObserver in site.js */
+.reveal {
+  opacity: 0;
+  transform: translateY(30px);
+  transition: opacity 0.7s ease, transform 0.7s ease;
+}
+
+.reveal.visible { opacity: 1; transform: none; }
+
+/* If JS is unavailable, show the content rather than hiding it forever */
+.no-js .reveal { opacity: 1; transform: none; }
+
+/* ─── RESPONSIVE CHROME ─── */
+
+/* Tighten the nav before it has to collapse. */
+@media (max-width: 1180px) {
+  .navbar { padding: 14px 20px; gap: 14px; }
+  .nav-links { gap: 15px; }
+}
+
+/* Nine nav items plus a logo and two buttons stop fitting around here,
+   so swap the inline links for the hamburger well before phone widths. */
+@media (max-width: 1024px) {
+  .nav-links { display: none; }
+  .hamburger { display: flex; }
+}
+
+@media (max-width: 900px) {
+  .footer-grid { grid-template-columns: 1fr 1fr; gap: 32px; }
+}
+
+@media (max-width: 768px) {
+  .navbar { left: 16px; right: 16px; padding: 12px 20px; }
+  .btn-login { display: none; }
+
+  /* Mobile GPUs pay the most for a full-width fixed backdrop filter.
+     Go fully matte here — visually near-identical, materially cheaper. */
+  .navbar {
+    -webkit-backdrop-filter: none;
+    backdrop-filter: none;
+    background-color: rgba(246,243,237,0.97);
+  }
+  .navbar.scrolled { background-color: rgba(244,240,233,0.99); }
+  .footer { padding: 40px 24px 24px; }
+  .footer-grid { grid-template-columns: 1fr; gap: 28px; }
+  .footer-bottom { flex-direction: column; gap: 12px; text-align: center; }
+}

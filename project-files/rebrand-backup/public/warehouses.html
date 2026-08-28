@@ -1,0 +1,814 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Browse Warehouses — Buy Per Square Foot</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;0,600;0,700;1,400;1,500&family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;1,300;1,400;1,500&family=Jost:wght@300;400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="assets/site.css">
+<style>
+
+/* NAVBAR */
+
+/* PAGE HEADER */
+.page-header {
+  padding: 140px 40px 60px;
+  background: linear-gradient(135deg, rgba(200,216,228,0.35) 0%, rgba(245,240,232,0.6) 50%, rgba(212,176,106,0.1) 100%);
+  border-bottom: 1px solid rgba(200,168,130,0.15);
+  position: relative; overflow: hidden;
+}
+.page-header::before {
+  content: '';
+  position: absolute; top: -100px; right: -100px;
+  width: 500px; height: 500px;
+  background: radial-gradient(ellipse, rgba(200,216,228,0.4) 0%, transparent 70%);
+  pointer-events: none;
+}
+.header-label { font-size: 10px; letter-spacing: 3px; text-transform: uppercase; color: var(--antique-gold); font-weight: 500; margin-bottom: 12px; display: block; }
+.header-title { font-family: var(--font-display); font-size: 44px; font-weight: 600; color: var(--deep-mahogany); line-height: 1.1; margin-bottom: 16px; }
+.header-title em { font-style: italic; color: var(--antique-brown); }
+.header-sub { font-size: 14px; color: var(--text-mid); line-height: 1.75; max-width: 560px; }
+.header-meta { display: flex; align-items: center; gap: 24px; margin-top: 24px; flex-wrap: wrap; }
+.meta-pill { display: inline-flex; align-items: center; gap: 6px; background: rgba(255,255,255,0.55); backdrop-filter: blur(16px); border: 1px solid rgba(255,255,255,0.7); border-radius: 100px; padding: 6px 14px; font-size: 11px; color: var(--antique-brown); letter-spacing: 0.5px; }
+
+/* SEARCH BAR */
+.search-bar-wrap {
+  background: rgba(255,255,255,0.6); backdrop-filter: blur(24px);
+  border: 1px solid rgba(255,255,255,0.8);
+  border-radius: 16px; padding: 20px 24px;
+  box-shadow: 0 8px 32px rgba(74,55,40,0.06);
+  margin: -30px 40px 0; position: relative; z-index: 10;
+  display: grid; grid-template-columns: 1fr 1fr 1fr 1fr auto; gap: 16px; align-items: end;
+}
+.search-field label { display: block; font-size: 10px; letter-spacing: 2px; text-transform: uppercase; color: var(--antique-gold); margin-bottom: 6px; }
+.search-field input, .search-field select {
+  width: 100%; background: rgba(250,247,242,0.8); border: 1px solid rgba(200,168,130,0.25);
+  border-radius: 8px; padding: 10px 14px; font-family: var(--font-body); font-size: 13px;
+  color: var(--deep-mahogany); outline: none; transition: border-color 0.25s;
+}
+.search-field input:focus, .search-field select:focus { border-color: var(--antique-gold); }
+.btn-search {
+  background: linear-gradient(135deg, var(--antique-brown), var(--deep-mahogany));
+  color: var(--off-white); border: none; border-radius: 8px; padding: 11px 28px;
+  font-family: var(--font-body); font-size: 11px; letter-spacing: 1.5px; text-transform: uppercase;
+  cursor: pointer; white-space: nowrap; transition: all 0.25s;
+  box-shadow: 0 4px 16px rgba(74,55,40,0.2);
+}
+.btn-search:hover { transform: translateY(-2px); box-shadow: 0 6px 24px rgba(74,55,40,0.3); }
+
+/* LAYOUT */
+.listings-layout { display: grid; grid-template-columns: 280px 1fr; gap: 32px; padding: 40px; max-width: 1400px; margin: 0 auto; align-items: start; }
+
+/* FILTER SIDEBAR */
+.filter-sidebar { position: sticky; top: 100px; }
+.filter-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
+.filter-title { font-family: var(--font-display); font-size: 18px; font-weight: 600; }
+.filter-reset { font-size: 11px; letter-spacing: 1px; text-transform: uppercase; color: var(--antique-gold); cursor: pointer; background: none; border: none; }
+.filter-group { background: rgba(255,255,255,0.55); backdrop-filter: blur(20px); border: 1px solid rgba(255,255,255,0.7); border-radius: 12px; padding: 20px; margin-bottom: 16px; box-shadow: 0 4px 16px rgba(74,55,40,0.05); }
+.filter-group-title { font-size: 10px; letter-spacing: 2.5px; text-transform: uppercase; color: var(--antique-gold); margin-bottom: 14px; }
+.filter-option { display: flex; align-items: center; gap: 10px; margin-bottom: 10px; cursor: pointer; }
+.filter-option input[type=checkbox] { accent-color: var(--antique-brown); width: 15px; height: 15px; }
+.filter-option span { font-size: 13px; color: var(--text-mid); }
+.filter-option span b { color: var(--deep-mahogany); font-weight: 500; }
+.range-wrap { position: relative; }
+.range-input { width: 100%; accent-color: var(--antique-brown); }
+.range-vals { display: flex; justify-content: space-between; font-size: 11px; color: var(--text-mid); margin-top: 6px; }
+.save-search-btn { width: 100%; background: rgba(184,150,74,0.1); border: 1px solid rgba(184,150,74,0.3); border-radius: 8px; padding: 10px; font-family: var(--font-body); font-size: 11px; letter-spacing: 1.5px; text-transform: uppercase; color: var(--antique-gold); cursor: pointer; transition: all 0.25s; }
+.save-search-btn:hover { background: rgba(184,150,74,0.2); }
+
+/* LISTINGS AREA */
+.listings-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px; flex-wrap: wrap; gap: 12px; }
+.results-count { font-size: 14px; color: var(--text-mid); }
+.results-count b { color: var(--deep-mahogany); }
+.view-controls { display: flex; align-items: center; gap: 12px; }
+.view-btn { background: rgba(255,255,255,0.55); backdrop-filter: blur(16px); border: 1px solid rgba(255,255,255,0.7); border-radius: 8px; padding: 8px 14px; font-size: 11px; letter-spacing: 1px; text-transform: uppercase; color: var(--antique-brown); cursor: pointer; transition: all 0.25s; }
+.view-btn.active, .view-btn:hover { background: rgba(255,255,255,0.8); color: var(--deep-mahogany); }
+.sort-select { background: rgba(255,255,255,0.6); border: 1px solid rgba(200,168,130,0.25); border-radius: 8px; padding: 8px 12px; font-family: var(--font-body); font-size: 12px; color: var(--deep-mahogany); outline: none; }
+
+/* COMPARE BAR */
+.compare-bar {
+  position: fixed; bottom: 0; left: 0; right: 0; z-index: 900;
+  background: rgba(74,55,40,0.96); backdrop-filter: blur(20px);
+  border-top: 1px solid rgba(255,255,255,0.1);
+  padding: 16px 40px; display: none; align-items: center; gap: 20px;
+  transform: translateY(100%); transition: transform 0.4s ease;
+}
+.compare-bar.visible { display: flex; transform: translateY(0); }
+.compare-slots { display: flex; gap: 16px; flex: 1; }
+.compare-slot { flex: 1; background: rgba(255,255,255,0.08); border: 1px dashed rgba(255,255,255,0.2); border-radius: 8px; padding: 10px 14px; min-height: 56px; display: flex; align-items: center; gap: 10px; }
+.compare-slot.filled { border-style: solid; border-color: rgba(184,150,74,0.5); background: rgba(184,150,74,0.1); }
+.compare-slot-name { font-size: 12px; color: rgba(255,255,255,0.85); font-weight: 500; }
+.compare-slot-price { font-size: 11px; color: rgba(184,150,74,0.9); }
+.compare-slot-empty { font-size: 11px; color: rgba(255,255,255,0.3); letter-spacing: 1px; text-transform: uppercase; }
+.compare-remove { background: none; border: none; color: rgba(255,255,255,0.4); cursor: pointer; font-size: 16px; margin-left: auto; }
+.btn-compare-now { background: linear-gradient(135deg, var(--antique-gold), var(--warm-gold)); color: var(--deep-mahogany); border: none; border-radius: 8px; padding: 12px 28px; font-family: var(--font-body); font-size: 11px; letter-spacing: 1.5px; text-transform: uppercase; font-weight: 600; cursor: pointer; white-space: nowrap; }
+.btn-compare-now:disabled { opacity: 0.4; cursor: not-allowed; }
+.compare-count { font-family: var(--font-display); font-size: 22px; color: var(--warm-gold); font-style: italic; white-space: nowrap; }
+
+/* LISTING CARDS GRID */
+.listings-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 24px; }
+
+.listing-card {
+  background: rgba(245,240,232,0.55); backdrop-filter: blur(20px) saturate(160%);
+  border: 1px solid rgba(255,255,255,0.70); border-radius: 16px;
+  box-shadow: 0 8px 32px rgba(139,111,78,0.08);
+  overflow: hidden; transition: all 0.3s ease; cursor: pointer;
+  position: relative;
+}
+.listing-card:hover { transform: translateY(-4px); box-shadow: 0 16px 48px rgba(139,111,78,0.14); }
+
+.card-photo { width: 100%; height: 200px; background: linear-gradient(135deg, var(--linen-beige), var(--powder-blue)); position: relative; overflow: hidden; }
+.card-photo-bg { width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; font-size: 64px; opacity: 0.4; }
+.card-photo-overlay { position: absolute; inset: 0; background: linear-gradient(to top, rgba(74,55,40,0.4) 0%, transparent 60%); }
+.card-badges { position: absolute; top: 12px; left: 12px; display: flex; gap: 6px; flex-wrap: wrap; }
+.badge-verified { background: linear-gradient(135deg, var(--antique-gold), var(--warm-gold)); color: var(--deep-mahogany); font-size: 9px; letter-spacing: 1.5px; text-transform: uppercase; font-weight: 600; padding: 4px 10px; border-radius: 100px; }
+.badge-type { background: rgba(255,255,255,0.85); backdrop-filter: blur(12px); color: var(--deep-mahogany); font-size: 9px; letter-spacing: 1px; text-transform: uppercase; padding: 4px 10px; border-radius: 100px; }
+.card-actions { position: absolute; top: 12px; right: 12px; display: flex; gap: 6px; }
+.card-action-btn { width: 32px; height: 32px; background: rgba(255,255,255,0.8); backdrop-filter: blur(12px); border: 1px solid rgba(255,255,255,0.9); border-radius: 50%; display: flex; align-items: center; justify-content: center; cursor: pointer; font-size: 14px; transition: all 0.25s; border: none; }
+.card-action-btn:hover { transform: scale(1.1); background: white; }
+.card-action-btn.saved { background: rgba(184,150,74,0.2); }
+.card-price-chip { position: absolute; bottom: 12px; left: 12px; }
+.price-per-sqft { font-family: var(--font-display); font-size: 22px; font-weight: 600; color: white; line-height: 1; }
+.price-label { font-size: 9px; letter-spacing: 1.5px; text-transform: uppercase; color: rgba(255,255,255,0.75); }
+
+.card-body { padding: 20px; }
+.card-title { font-family: var(--font-display); font-size: 16px; font-weight: 600; color: var(--deep-mahogany); margin-bottom: 4px; line-height: 1.3; }
+.card-location { font-size: 11px; color: var(--text-mid); letter-spacing: 0.5px; margin-bottom: 14px; }
+.card-location span { color: var(--antique-gold); }
+.card-specs { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px; margin-bottom: 16px; }
+.spec-item { text-align: center; background: rgba(250,247,242,0.7); border: 1px solid rgba(200,168,130,0.15); border-radius: 8px; padding: 8px 4px; }
+.spec-val { font-size: 13px; font-weight: 600; color: var(--deep-mahogany); display: block; }
+.spec-label { font-size: 9px; letter-spacing: 1px; text-transform: uppercase; color: var(--text-mid); }
+.card-footer { display: flex; align-items: center; gap: 10px; }
+.btn-enquire { flex: 1; background: linear-gradient(135deg, var(--antique-brown), var(--deep-mahogany)); color: var(--off-white); border: none; border-radius: 8px; padding: 10px; font-family: var(--font-body); font-size: 11px; letter-spacing: 1.5px; text-transform: uppercase; cursor: pointer; transition: all 0.25s; }
+.btn-enquire:hover { transform: translateY(-1px); box-shadow: 0 4px 16px rgba(74,55,40,0.25); }
+.btn-compare-add { background: rgba(255,255,255,0.6); border: 1px solid rgba(200,168,130,0.3); border-radius: 8px; padding: 10px 14px; font-size: 11px; letter-spacing: 1px; text-transform: uppercase; color: var(--antique-brown); cursor: pointer; transition: all 0.25s; white-space: nowrap; }
+.btn-compare-add:hover { background: rgba(255,255,255,0.85); }
+.btn-compare-add.in-compare { background: rgba(184,150,74,0.1); border-color: rgba(184,150,74,0.4); color: var(--antique-gold); }
+
+/* MAP VIEW */
+.map-view { display: none; border-radius: 16px; overflow: hidden; background: linear-gradient(135deg, rgba(200,216,228,0.4), rgba(245,240,232,0.6)); min-height: 600px; border: 1px solid rgba(255,255,255,0.7); position: relative; }
+.map-view.active { display: block; }
+.map-placeholder { display: flex; flex-direction: column; align-items: center; justify-content: center; height: 600px; gap: 16px; }
+.map-placeholder .map-icon { font-size: 80px; opacity: 0.3; }
+.map-placeholder p { font-size: 14px; color: var(--text-mid); }
+.map-pins { position: absolute; inset: 0; }
+.map-pin { position: absolute; cursor: pointer; transform: translate(-50%, -100%); }
+.pin-dot { width: 36px; height: 36px; background: linear-gradient(135deg, var(--antique-gold), var(--warm-gold)); border-radius: 50% 50% 50% 0; transform: rotate(-45deg); box-shadow: 0 4px 12px rgba(184,150,74,0.4); display: flex; align-items: center; justify-content: center; }
+.pin-dot span { transform: rotate(45deg); font-size: 14px; }
+.map-pin-label { background: rgba(74,55,40,0.9); color: white; font-size: 10px; padding: 4px 8px; border-radius: 4px; margin-top: 4px; white-space: nowrap; text-align: center; }
+
+/* COMPARE MODAL */
+.modal-overlay { position: fixed; inset: 0; background: rgba(74,55,40,0.6); backdrop-filter: blur(12px); z-index: 2000; display: none; align-items: center; justify-content: center; padding: 20px; }
+.modal-overlay.open { display: flex; }
+.compare-modal { background: rgba(250,247,242,0.95); backdrop-filter: blur(40px); border: 1px solid rgba(255,255,255,0.8); border-radius: 24px; box-shadow: 0 32px 80px rgba(74,55,40,0.2); max-width: 900px; width: 100%; max-height: 90vh; overflow-y: auto; }
+.modal-header { padding: 28px 32px 20px; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid rgba(200,168,130,0.2); }
+.modal-title { font-family: var(--font-display); font-size: 24px; font-weight: 600; }
+.modal-close { background: none; border: none; font-size: 22px; cursor: pointer; color: var(--text-mid); }
+.compare-table { padding: 24px 32px 32px; overflow-x: auto; }
+.compare-table table { width: 100%; border-collapse: collapse; }
+.compare-table th { font-size: 11px; letter-spacing: 1.5px; text-transform: uppercase; color: var(--antique-gold); text-align: left; padding: 8px 12px; }
+.compare-table th:first-child { color: var(--text-mid); font-size: 10px; }
+.compare-table td { padding: 12px; border-bottom: 1px solid rgba(200,168,130,0.12); font-size: 13px; color: var(--deep-mahogany); vertical-align: top; }
+.compare-table td:first-child { font-size: 11px; letter-spacing: 0.5px; color: var(--text-mid); text-transform: uppercase; font-weight: 500; }
+.compare-table tr:last-child td { border-bottom: none; }
+.compare-best { color: var(--sage-green); font-weight: 600; }
+
+/* PAGINATION */
+.pagination { display: flex; justify-content: center; align-items: center; gap: 8px; margin-top: 48px; }
+.page-btn { width: 40px; height: 40px; background: rgba(255,255,255,0.55); backdrop-filter: blur(16px); border: 1px solid rgba(255,255,255,0.7); border-radius: 8px; font-size: 13px; color: var(--antique-brown); cursor: pointer; display: flex; align-items: center; justify-content: center; transition: all 0.25s; }
+.page-btn.active, .page-btn:hover { background: rgba(255,255,255,0.85); color: var(--deep-mahogany); }
+
+/* FOOTER */
+
+/* WHATSAPP */
+@keyframes pulse { 0%,100%{box-shadow:0 4px 20px rgba(37,211,102,0.4);} 50%{box-shadow:0 4px 32px rgba(37,211,102,0.6);} }
+
+@media (max-width: 1100px) { .listings-layout { grid-template-columns: 1fr; } .filter-sidebar { position: static; } }
+@media (max-width: 768px) {  .search-bar-wrap { margin: -20px 16px 0; grid-template-columns: 1fr; } .listings-layout { padding: 24px 16px; }  .compare-bar { padding: 12px 16px; } }
+</style>
+<script src="assets/api.js" defer></script>
+<script src="assets/demo-data.js" defer></script>
+<script src="assets/site.js" defer></script>
+<script src="assets/bpsf-store.js" defer></script>
+</head>
+<body>
+
+<!-- NAVBAR -->
+<nav class="navbar" id="navbar">
+  <a href="index.html" class="nav-logo">Buy Per Sq<span>·</span>Ft</a>
+  <ul class="nav-links">
+    <li><a href="index.html">Home</a></li>
+    <li><a href="warehouses.html" class="active">Warehouses</a></li>
+    <li><a href="land-parks.html">Land &amp; Parks</a></li>
+    <li><a href="insights.html">Insights</a></li>
+    <li><a href="calculator.html">Calculator</a></li>
+    <li><a href="partners.html">Partners</a></li>
+    <li><a href="about.html">About</a></li>
+    <li><a href="contact.html">Contact</a></li>
+  </ul>
+  <div class="nav-actions">
+    <a href="login.html" class="btn-login">Login</a>
+    <a href="submit-listing.html" class="btn-cta-nav">List Property</a>
+    <div class="hamburger" id="hamburger" onclick="toggleMenu()" role="button" aria-label="Menu" aria-expanded="false" aria-controls="mobileMenu">
+      <span></span><span></span><span></span>
+    </div>
+  </div>
+</nav>
+
+<div class="mobile-menu" id="mobileMenu">
+  <ul>
+    <li><a href="index.html" onclick="toggleMenu()">Home</a></li>
+    <li><a href="warehouses.html" onclick="toggleMenu()">Warehouses</a></li>
+    <li><a href="land-parks.html" onclick="toggleMenu()">Land &amp; Parks</a></li>
+    <li><a href="insights.html" onclick="toggleMenu()">Insights</a></li>
+    <li><a href="calculator.html" onclick="toggleMenu()">Calculator</a></li>
+    <li><a href="partners.html" onclick="toggleMenu()">Partners</a></li>
+    <li><a href="about.html" onclick="toggleMenu()">About</a></li>
+    <li><a href="contact.html" onclick="toggleMenu()">Contact</a></li>
+    <li><a href="login.html" onclick="toggleMenu()">Login</a></li>
+  </ul>
+</div>
+
+<!-- PAGE HEADER -->
+<div class="page-header">
+  <span class="header-label">Industrial Warehousing</span>
+  <h1 class="header-title">Browse <em>Warehouses</em></h1>
+  <p class="header-sub">2,400+ verified industrial spaces across 48 cities. Every listing inspected on-site by our team.</p>
+  <div class="header-meta">
+    <span class="meta-pill">🏭 2,400+ Listings</span>
+    <span class="meta-pill">📍 48 Cities</span>
+    <span class="meta-pill">✦ BPSF Verified</span>
+    <span class="meta-pill">⚡ Updated Daily</span>
+  </div>
+</div>
+
+<!-- SEARCH BAR -->
+<div class="search-bar-wrap">
+  <div class="search-field">
+    <label>City / Location</label>
+    <input type="text" placeholder="Mumbai, Pune, Delhi NCR…" id="cityInput">
+  </div>
+  <div class="search-field">
+    <label>Warehouse Type</label>
+    <select id="typeSelect">
+      <option value="">All Types</option>
+      <option value="Warehouse">Warehouse</option>
+      <option value="Cold Storage">Cold Storage</option>
+      <option value="Industrial Shed">Industrial Shed</option>
+      <option value="Logistics Park">Logistics Park</option>
+      <option value="Dark Store">Dark Store</option>
+      <option value="Industrial Land">Industrial Land</option>
+    </select>
+  </div>
+  <div class="search-field">
+    <label>Min Area (sq ft)</label>
+    <input type="number" placeholder="e.g. 10,000" id="minAreaInput">
+  </div>
+  <div class="search-field">
+    <label>Max Rent (₹/sq ft)</label>
+    <input type="number" placeholder="e.g. 35" id="maxRateInput">
+  </div>
+  <button class="btn-search" onclick="filterListings()">Search →</button>
+</div>
+
+<!-- MAIN LAYOUT -->
+<div class="listings-layout">
+
+  <!-- FILTER SIDEBAR -->
+  <aside class="filter-sidebar">
+    <div class="filter-header">
+      <h3 class="filter-title">Filters</h3>
+      <button class="filter-reset" onclick="resetFilters()">Reset All</button>
+    </div>
+
+    <div class="filter-group">
+      <div class="filter-group-title">Warehouse Type</div>
+      <label class="filter-option"><input type="checkbox" checked> <span>Grade A <b>(842)</b></span></label>
+      <label class="filter-option"><input type="checkbox" checked> <span>Grade B <b>(614)</b></span></label>
+      <label class="filter-option"><input type="checkbox"> <span>Cold Chain <b>(183)</b></span></label>
+      <label class="filter-option"><input type="checkbox"> <span>Dark Store <b>(97)</b></span></label>
+      <label class="filter-option"><input type="checkbox"> <span>Built-to-Suit <b>(210)</b></span></label>
+      <label class="filter-option"><input type="checkbox"> <span>SEZ / Free Trade <b>(54)</b></span></label>
+    </div>
+
+    <div class="filter-group">
+      <div class="filter-group-title">Price (₹ / sq ft / month)</div>
+      <div class="range-wrap">
+        <input type="range" class="range-input" min="5" max="80" value="50" oninput="updateRange(this, 'priceVal')">
+        <div class="range-vals"><span>₹5</span><span id="priceVal">₹50</span></div>
+      </div>
+    </div>
+
+    <div class="filter-group">
+      <div class="filter-group-title">Area (sq ft)</div>
+      <div class="range-wrap">
+        <input type="range" class="range-input" min="1000" max="500000" step="1000" value="100000" oninput="updateRange(this, 'areaVal')">
+        <div class="range-vals"><span>1K</span><span id="areaVal">1,00,000</span></div>
+      </div>
+    </div>
+
+    <div class="filter-group">
+      <div class="filter-group-title">City</div>
+      <label class="filter-option"><input type="checkbox" checked> <span>Mumbai <b>(340)</b></span></label>
+      <label class="filter-option"><input type="checkbox" checked> <span>Delhi NCR <b>(290)</b></span></label>
+      <label class="filter-option"><input type="checkbox"> <span>Pune <b>(210)</b></span></label>
+      <label class="filter-option"><input type="checkbox"> <span>Bengaluru <b>(180)</b></span></label>
+      <label class="filter-option"><input type="checkbox"> <span>Hyderabad <b>(152)</b></span></label>
+      <label class="filter-option"><input type="checkbox"> <span>Chennai <b>(124)</b></span></label>
+      <label class="filter-option"><input type="checkbox"> <span>Ahmedabad <b>(98)</b></span></label>
+    </div>
+
+    <div class="filter-group">
+      <div class="filter-group-title">Features</div>
+      <label class="filter-option"><input type="checkbox"> <span>24/7 Security</span></label>
+      <label class="filter-option"><input type="checkbox"> <span>Fire Suppression System</span></label>
+      <label class="filter-option"><input type="checkbox"> <span>Loading Docks</span></label>
+      <label class="filter-option"><input type="checkbox"> <span>Power Backup</span></label>
+      <label class="filter-option"><input type="checkbox"> <span>Rainwater Harvesting</span></label>
+      <label class="filter-option"><input type="checkbox"> <span>EV Charging</span></label>
+    </div>
+
+    <div class="filter-group">
+      <div class="filter-group-title">Availability</div>
+      <label class="filter-option"><input type="checkbox" checked> <span>Immediately Available</span></label>
+      <label class="filter-option"><input type="checkbox"> <span>Within 30 Days</span></label>
+      <label class="filter-option"><input type="checkbox"> <span>Within 90 Days</span></label>
+    </div>
+
+    <div class="filter-group">
+      <div class="filter-group-title">Certification</div>
+      <label class="filter-option"><input type="checkbox"> <span>BPSF Verified ✦</span></label>
+      <label class="filter-option"><input type="checkbox"> <span>LEED Certified</span></label>
+      <label class="filter-option"><input type="checkbox"> <span>ISO 9001</span></label>
+    </div>
+
+    <button class="save-search-btn" onclick="saveSearch()">⊕ Save This Search</button>
+  </aside>
+
+  <!-- LISTINGS RIGHT PANEL -->
+  <div class="listings-right">
+    <div class="listings-header">
+      <p class="results-count"><b id="resultsCount">2,400+</b> warehouses found</p>
+      <div class="view-controls">
+        <button class="view-btn active" id="gridBtn" onclick="setView('grid')">⊞ Grid</button>
+        <button class="view-btn" id="mapBtn" onclick="setView('map')">◎ Map</button>
+        <select class="sort-select" onchange="sortListings(this.value)">
+          <option>Sort: Recommended</option>
+          <option>Price: Low to High</option>
+          <option>Price: High to Low</option>
+          <option>Area: Largest First</option>
+          <option>Newest Listed</option>
+        </select>
+      </div>
+    </div>
+
+    <!-- GRID VIEW -->
+    <div class="listings-grid" id="gridView">
+      <div class="empty-state" id="gridLoading" style="grid-column:1/-1;padding:48px;text-align:center;color:var(--text-mid);font-size:13px;">Loading properties…</div>
+
+    </div>
+
+    <!-- MAP VIEW -->
+    <div class="map-view" id="mapView">
+      <div class="map-placeholder">
+        <div class="map-icon">🗺️</div>
+        <p style="font-family: var(--font-display); font-size: 20px; color: var(--deep-mahogany);">Interactive Map View</p>
+        <p>Showing 2,400+ listings across India</p>
+      </div>
+      <div class="map-pins">
+        <div class="map-pin" style="left: 32%; top: 55%;">
+          <div class="pin-dot"><span>🏭</span></div>
+          <div class="map-pin-label">Mumbai · ₹28–55/sqft</div>
+        </div>
+        <div class="map-pin" style="left: 54%; top: 28%;">
+          <div class="pin-dot"><span>🏭</span></div>
+          <div class="map-pin-label">Delhi NCR · ₹18–42/sqft</div>
+        </div>
+        <div class="map-pin" style="left: 36%; top: 60%;">
+          <div class="pin-dot"><span>🏭</span></div>
+          <div class="map-pin-label">Pune · ₹22–38/sqft</div>
+        </div>
+        <div class="map-pin" style="left: 42%; top: 72%;">
+          <div class="pin-dot"><span>🏭</span></div>
+          <div class="map-pin-label">Bengaluru · ₹28–45/sqft</div>
+        </div>
+        <div class="map-pin" style="left: 46%; top: 66%;">
+          <div class="pin-dot"><span>🏭</span></div>
+          <div class="map-pin-label">Hyderabad · ₹20–36/sqft</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- PAGINATION -->
+    <div class="pagination">
+      <button class="page-btn active" onclick="goToPage(1,this)">1</button>
+      <button class="page-btn" onclick="goToPage(2,this)">2</button>
+      <button class="page-btn" onclick="goToPage(3,this)">3</button>
+      <button class="page-btn" disabled aria-hidden="true">…</button>
+      <button class="page-btn" onclick="goToPage(48,this)">48</button>
+      <button class="page-btn" onclick="nextPage()">→</button>
+    </div>
+  </div>
+</div>
+
+<!-- COMPARE BAR -->
+<div class="compare-bar" id="compareBar">
+  <div class="compare-count" id="compareCount">0 / 3</div>
+  <div class="compare-slots">
+    <div class="compare-slot" id="slot0"><span class="compare-slot-empty">Add a property</span></div>
+    <div class="compare-slot" id="slot1"><span class="compare-slot-empty">Add a property</span></div>
+    <div class="compare-slot" id="slot2"><span class="compare-slot-empty">Add a property</span></div>
+  </div>
+  <button class="btn-compare-now" id="compareNowBtn" onclick="openCompare()" disabled>Compare Now →</button>
+</div>
+
+<!-- COMPARE MODAL -->
+<div class="modal-overlay" id="compareModal">
+  <div class="compare-modal">
+    <div class="modal-header">
+      <h2 class="modal-title">Property Comparison</h2>
+      <button class="modal-close" onclick="closeCompare()">✕</button>
+    </div>
+    <!-- Rendered from the selected properties by renderCompareTable() -->
+    <div class="compare-table">
+      <table>
+        <thead><tr id="compareHead"></tr></thead>
+        <tbody id="compareBody"></tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<!-- WHATSAPP -->
+<a href="https://wa.me/919999000000" class="whatsapp-bubble" target="_blank">💬</a>
+
+<!-- FOOTER -->
+<footer class="footer">
+  <div class="footer-grid">
+    <div>
+      <div class="footer-brand-name">Buy Per Sq<span>·</span>Ft</div>
+      <p class="footer-desc">India's most trusted marketplace for industrial and warehousing real estate. Every square foot, verified.</p>
+    </div>
+    <div>
+      <div class="footer-col-title">Properties</div>
+      <ul class="footer-links">
+        <li><a href="warehouses.html">Warehouses</a></li>
+        <li><a href="land-parks.html">Industrial Land</a></li>
+        <li><a href="land-parks.html">Logistics Parks</a></li>
+        <li><a href="warehouses.html">Cold Storage</a></li>
+      </ul>
+    </div>
+    <div>
+      <div class="footer-col-title">Company</div>
+      <ul class="footer-links">
+        <li><a href="about.html">About BPSF</a></li>
+        <li><a href="partners.html">Partners</a></li>
+        <li><a href="insights.html">Market Insights</a></li>
+        <li><a href="contact.html">Contact</a></li>
+      </ul>
+    </div>
+    <div>
+      <div class="footer-col-title">Account</div>
+      <ul class="footer-links">
+        <li><a href="login.html">Login</a></li>
+        <li><a href="register.html">Register</a></li>
+        <li><a href="submit-listing.html">List Property</a></li>
+        <li><a href="terms.html">Terms of Service</a></li>
+        <li><a href="privacy.html">Privacy Policy</a></li>
+      </ul>
+    </div>
+  </div>
+  <div class="footer-bottom">
+    <span class="footer-copy">© 2026 Buy Per Square Foot Pvt Ltd. All rights reserved.</span>
+    <span class="footer-copy">Made with ✦ in India</span>
+  </div>
+</footer>
+
+<script>
+  // View toggle
+  function setView(v) {
+    const grid = document.getElementById('gridView');
+    const map = document.getElementById('mapView');
+    document.getElementById('gridBtn').classList.toggle('active', v === 'grid');
+    document.getElementById('mapBtn').classList.toggle('active', v === 'map');
+    grid.style.display = v === 'grid' ? 'grid' : 'none';
+    map.classList.toggle('active', v === 'map');
+  }
+
+  // Range display
+  function updateRange(el, id) {
+    const v = parseInt(el.value);
+    document.getElementById(id).textContent = id === 'priceVal' ? '₹' + v : v.toLocaleString('en-IN');
+  }
+
+  /* Compare bar + table render from the shared store (assets/bpsf-store.js),
+     so a selection survives reloads and is shared with every other page.
+     Saving and add-to-compare are handled by the store's delegated listener —
+     the cards opt in via data-fav-id / data-cmp-id attributes. */
+
+  function updateCompareBar() {
+    if (!window.BPSF) return;
+    const items = BPSF.compare.listSync();
+    const max = BPSF.COMPARE_MAX;
+    document.getElementById('compareCount').textContent = items.length + ' / ' + max;
+
+    for (let i = 0; i < max; i++) {
+      const slot = document.getElementById('slot' + i);
+      if (!slot) continue;
+      slot.textContent = '';
+      if (items[i]) {
+        slot.classList.add('filled');
+        const wrap = document.createElement('div');
+        const name = document.createElement('div');
+        name.className = 'compare-slot-name';
+        name.textContent = items[i].name;              // textContent, never innerHTML
+        const rate = document.createElement('div');
+        rate.className = 'compare-slot-price';
+        rate.textContent = items[i].rate;
+        wrap.append(name, rate);
+        const rm = document.createElement('button');
+        rm.className = 'compare-remove';
+        rm.type = 'button';
+        rm.textContent = '✕';
+        rm.setAttribute('aria-label', 'Remove ' + items[i].name + ' from comparison');
+        rm.onclick = () => BPSF.compare.remove(items[i].id);
+        slot.append(wrap, rm);
+      } else {
+        slot.classList.remove('filled');
+        const empty = document.createElement('span');
+        empty.className = 'compare-slot-empty';
+        empty.textContent = 'Add a property';
+        slot.append(empty);
+      }
+    }
+
+    document.getElementById('compareNowBtn').disabled = items.length < 2;
+    document.getElementById('compareBar').classList.toggle('visible', items.length > 0);
+  }
+
+  // Only rows we hold real data for — no invented specs.
+  const COMPARE_ROWS = [
+    { label: 'Price / sq ft', key: 'rate', best: 'min' },
+    { label: 'Location', key: 'location' },
+    { label: 'Total area', key: 'area' }
+  ];
+
+  function renderCompareTable() {
+    if (!window.BPSF) return;
+    const items = BPSF.compare.listSync();
+    const head = document.getElementById('compareHead');
+    const body = document.getElementById('compareBody');
+    if (!head || !body) return;
+
+    head.textContent = '';
+    body.textContent = '';
+
+    const th0 = document.createElement('th');
+    th0.textContent = 'Attribute';
+    head.append(th0);
+    items.forEach(it => {
+      const th = document.createElement('th');
+      th.textContent = it.name;
+      head.append(th);
+    });
+
+    // Cheapest rate wins the highlight — parsed from the "₹28/sqft" label.
+    const rateOf = it => parseFloat(String(it.rate).replace(/[^0-9.]/g, '')) || Infinity;
+    const cheapest = Math.min(...items.map(rateOf));
+
+    COMPARE_ROWS.forEach(row => {
+      const tr = document.createElement('tr');
+      const label = document.createElement('td');
+      label.textContent = row.label;
+      tr.append(label);
+      items.forEach(it => {
+        const td = document.createElement('td');
+        td.textContent = it[row.key] || '—';
+        if (row.best === 'min' && items.length > 1 && rateOf(it) === cheapest) {
+          td.classList.add('compare-best');
+        }
+        tr.append(td);
+      });
+      body.append(tr);
+    });
+
+    const actions = document.createElement('tr');
+    actions.append(document.createElement('td'));
+    items.forEach(it => {
+      const td = document.createElement('td');
+      const btn = document.createElement('button');
+      btn.className = 'btn-enquire';
+      btn.type = 'button';
+      btn.style.cssText = 'width:100%; border-radius:8px; padding:10px;';
+      btn.textContent = 'Enquire';
+      btn.onclick = () => { window.location = it.url || 'property-detail.html'; };
+      td.append(btn);
+      actions.append(td);
+    });
+    body.append(actions);
+  }
+
+  function openCompare() {
+    renderCompareTable();
+    document.getElementById('compareModal').classList.add('open');
+  }
+  function closeCompare() { document.getElementById('compareModal').classList.remove('open'); }
+
+  window.addEventListener('bpsf:compare', () => { updateCompareBar(); renderCompareTable(); });
+  document.addEventListener('DOMContentLoaded', updateCompareBar);
+  document.addEventListener('keydown', e => { if (e.key === 'Escape') closeCompare(); });
+
+  /* ── Listings come from the API (GET /api/properties) ──
+     Only approved properties are ever returned; the server enforces that,
+     not this page. */
+  var currentSort = 'newest';
+
+  var escHtml = function (s) {
+    return String(s == null ? '' : s)
+      .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;').replace(/'/g, '&#39;');
+  };
+
+  var ICON = {
+    'Warehouse': '🏭', 'Cold Storage': '❄️', 'Industrial Shed': '🏗️',
+    'Logistics Park': '🚛', 'Dark Store': '🛒', 'Industrial Land': '🏞️'
+  };
+
+  /* Real photo when the listing has one, type emoji otherwise. Seeded and
+     older listings carry no images, so the emoji is a genuine fallback
+     rather than dead code. */
+  function coverPhoto(p) {
+    var imgs = p.images || [];
+    var cover = imgs.filter(function (i) { return i && i.isPrimary && i.url; })[0] || imgs[0];
+    if (cover && cover.url) {
+      return '<img class="card-photo-bg" src="' + escHtml(cover.url) + '" alt="' + escHtml(p.name) +
+             '" loading="lazy" style="width:100%;height:100%;object-fit:cover;display:block;">';
+    }
+    return '<div class="card-photo-bg">' + (ICON[p.type] || '🏭') + '</div>';
+  }
+
+  function currentFilters() {
+    var v = function (id) { var el = document.getElementById(id); return el ? el.value.trim() : ''; };
+    return {
+      city: v('cityInput'),
+      type: v('typeSelect'),
+      minArea: v('minAreaInput'),
+      maxRate: v('maxRateInput'),
+      sort: currentSort,
+      page: currentPage,
+      limit: 24
+    };
+  }
+
+  function cardHtml(p) {
+    var loc = escHtml(p.location || p.city || '');
+    var name = escHtml(p.name);
+    var rate = '₹' + p.rate + '/sqft';
+    var area = Number(p.area || 0).toLocaleString('en-IN') + ' sq ft';
+    var attrs = 'data-name="' + name + '" data-location="' + loc +
+                '" data-rate="' + rate + '" data-area="' + area +
+                '" data-url="property-detail.html?id=' + p.id + '"';
+
+    return '' +
+      '<div class="listing-card">' +
+        '<div class="card-photo">' +
+          coverPhoto(p) +
+          '<div class="card-photo-overlay"></div>' +
+          '<div class="card-badges">' +
+            (p.isVerified ? '<span class="badge-verified">✦ BPSF Verified</span>' : '') +
+            '<span class="badge-type">' + escHtml(p.grade || p.type) + '</span>' +
+          '</div>' +
+          '<div class="card-actions">' +
+            '<button class="card-action-btn" data-fav-id="' + p.id + '" data-fav-icon ' + attrs + '>♡</button>' +
+            '<button class="card-action-btn" onclick="shareCard()" title="Share">↗</button>' +
+          '</div>' +
+          '<div class="card-price-chip">' +
+            '<div class="price-per-sqft">₹' + p.rate + '</div>' +
+            '<div class="price-label">Per Sq Ft / Month</div>' +
+          '</div>' +
+        '</div>' +
+        '<div class="card-body">' +
+          '<div class="card-title">' + name + '</div>' +
+          '<div class="card-location"><span>📍</span> ' + loc + '</div>' +
+          '<div class="card-specs">' +
+            '<div class="spec-item"><span class="spec-val">' + Number(p.area || 0).toLocaleString('en-IN') + '</span><span class="spec-label">Sq Ft</span></div>' +
+            '<div class="spec-item"><span class="spec-val">' + (p.specs && p.specs.clearHeight ? p.specs.clearHeight + 'm' : '—') + '</span><span class="spec-label">Clear Height</span></div>' +
+            '<div class="spec-item"><span class="spec-val">' + (p.specs && p.specs.loadingDocks ? p.specs.loadingDocks : '—') + '</span><span class="spec-label">Dock Doors</span></div>' +
+          '</div>' +
+          '<div class="card-footer">' +
+            '<button class="btn-enquire" onclick="window.location=\'property-detail.html?id=' + p.id + '\'">Enquire Now</button>' +
+            '<button class="btn-compare-add" data-cmp-id="' + p.id + '" data-cmp-label ' + attrs + '>+ Compare</button>' +
+          '</div>' +
+        '</div>' +
+      '</div>';
+  }
+
+  function paint(res) {
+    var grid = document.getElementById('gridView');
+    var items = res.items || [];
+    document.getElementById('resultsCount').textContent = res.total;
+
+    if (!items.length) {
+      grid.innerHTML =
+        '<div style="grid-column:1/-1;padding:56px 24px;text-align:center;color:var(--text-mid);">' +
+        '<div style="font-size:32px;opacity:.5;margin-bottom:10px;">🔍</div>' +
+        'No properties match these filters.' +
+        '</div>';
+      return;
+    }
+
+    grid.innerHTML = items.map(cardHtml).join('');
+    // Repaint favourite/compare buttons for the freshly-rendered cards.
+    if (window.BPSF) BPSF.refresh();
+    if (res.demo && window.BPSFDemo) BPSFDemo.showBanner();
+  }
+
+  function loadListings() {
+    var grid = document.getElementById('gridView');
+    grid.innerHTML = '<div style="grid-column:1/-1;padding:48px;text-align:center;color:var(--text-mid);font-size:13px;">Loading properties…</div>';
+    var filters = currentFilters();
+
+    return API.properties.list(filters)
+      .then(paint)
+      .catch(function (err) {
+        /* No backend yet → show sample listings rather than an error wall,
+           so the page is still usable while the API is being set up. */
+        if (window.BPSFDemo) {
+          console.warn('[BPSF] API unavailable (' + err.message + ') — showing demo listings.');
+          paint(BPSFDemo.query(filters));
+          return;
+        }
+        grid.innerHTML =
+          '<div style="grid-column:1/-1;padding:48px 24px;text-align:center;color:var(--text-mid);">' +
+          '<div style="font-size:30px;opacity:.5;margin-bottom:10px;">⚠️</div>' +
+          '<div style="margin-bottom:6px;color:var(--deep-mahogany);">Could not load properties.</div>' +
+          '<div style="font-size:12px;">' + escHtml(err.message) + '</div>' +
+          '<div style="font-size:12px;margin-top:10px;">Is the API running? <code>cd server &amp;&amp; npm run dev</code></div>' +
+          '</div>';
+      });
+  }
+
+  var currentPage = 1;
+
+  function goToPage(n, btn) {
+    currentPage = n;
+    if (btn) {
+      document.querySelectorAll('.page-btn').forEach(function (b) { b.classList.remove('active'); });
+      btn.classList.add('active');
+    }
+    loadListings().then(function () {
+      document.querySelector('.listings-header').scrollIntoView({ behavior: 'smooth', block: 'start' });
+    });
+  }
+
+  function nextPage() {
+    var btns = [].slice.call(document.querySelectorAll('.page-btn'))
+      .filter(function (b) { return /^\d+$/.test(b.textContent.trim()); });
+    var idx = btns.findIndex(function (b) { return b.classList.contains('active'); });
+    var next = btns[idx + 1];
+    if (next) goToPage(parseInt(next.textContent, 10), next);
+  }
+
+  /* Saved searches are per-device until the API stores them per account. */
+  function saveSearch() {
+    var f = currentFilters();
+    var label = [f.city, f.type, f.maxRate ? 'under ₹' + f.maxRate : '']
+      .filter(Boolean).join(' · ') || 'All warehouses';
+    var saved = [];
+    try { saved = JSON.parse(localStorage.getItem('bpsf.saved_searches') || '[]'); } catch (e) {}
+    if (!saved.some(function (s) { return s.label === label; })) {
+      saved.push({ label: label, filters: f });
+      try { localStorage.setItem('bpsf.saved_searches', JSON.stringify(saved)); } catch (e) {}
+    }
+    if (window.BPSF) BPSF.toast('Search saved: ' + label);
+  }
+
+  function filterListings() { currentPage = 1; loadListings(); }
+  function sortListings(v) { currentSort = v || 'newest'; currentPage = 1; loadListings(); }
+
+  function resetFilters() {
+    document.querySelectorAll('input[type=checkbox]').forEach(function (c) { c.checked = false; });
+    ['cityInput', 'minAreaInput', 'maxRateInput'].forEach(function (id) {
+      var el = document.getElementById(id); if (el) el.value = '';
+    });
+    var t = document.getElementById('typeSelect'); if (t) t.value = '';
+    loadListings();
+  }
+
+  function shareCard() {
+    if (navigator.clipboard) {
+      navigator.clipboard.writeText(location.href)
+        .then(function () { if (window.BPSF) BPSF.toast('Link copied to clipboard.'); });
+    }
+  }
+
+  document.addEventListener('DOMContentLoaded', loadListings);
+
+  // Init
+  document.getElementById('mapView').style.display = 'none';
+</script>
+</body>
+</html>

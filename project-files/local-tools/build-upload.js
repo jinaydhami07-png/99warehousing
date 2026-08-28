@@ -67,6 +67,15 @@ fs.copyFileSync(
   path.join(OUT, 'server', '.htaccess')
 );
 
+/* A second deny rule at the application root, covering the whole folder if it
+   is placed inside public_html rather than beside it. Stored in deploy/ under
+   a non-dot name so it is visible in a file browser; it only becomes
+   .htaccess here, where Apache needs that exact name. */
+fs.copyFileSync(
+  path.join(SRC, 'approot.htaccess'),
+  path.join(OUT, '.htaccess')
+);
+
 /* 3. Root manifest: dependencies only. devDependencies are nodemon,
       pino-pretty and pm2 — none used in production, and cPanel supervises
       the process itself. */

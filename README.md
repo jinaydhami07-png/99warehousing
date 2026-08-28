@@ -90,8 +90,10 @@ nothing persists to a server.
 For real shared listings the API needs a host that runs Node — a cPanel plan with the Node app
 feature, or Render / Railway with the domain pointed at it by CNAME.
 
-`.cpanel.yml` deploys `deploy/public/` to `public_html` when cPanel pulls from GitHub. Set the
-`CPANELUSER` placeholder in it before first deploy.
+Deployment is currently manual: upload the contents of `deploy/public/` to `public_html` so
+`index.html` and `assets/` sit side by side at the web root. A `.cpanel.yml` for automatic
+deployment from GitHub was written and then removed until the hosting path is settled — recover it
+from commit `1a1f5e8` if cPanel ends up pulling this repo.
 
 ---
 

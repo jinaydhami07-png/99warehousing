@@ -1,7 +1,10 @@
 #!/bin/bash
 # End-to-end exercise of the PHP API. Every call goes over HTTP, exactly as
 # the browser makes it.
-BASE=http://127.0.0.1:8080/api/v1
+# Override to test another running instance, e.g. the deployed layout:
+#   BASE=http://127.0.0.1:8090/api/v1 bash bin/api-test.sh
+BASE=${BASE:-http://127.0.0.1:8080/api/v1}
+SITE=${BASE%/api/v1}
 JAR=$(mktemp)
 PASS=0; FAIL=0
 
@@ -68,6 +71,15 @@ envval() { sed -n "s/^$1=//p" "$ENVFILE" | head -1 | tr -d '"'"'"'\r'; }
 DB_NAME=$(envval DB_NAME); DB_USER=$(envval DB_USER)
 DB_PASSWORD=$(envval DB_PASSWORD); DB_HOST=$(envval DB_HOST)
 PASSKEY=$(envval ADMIN_PASSKEY)
+
+# PUBLIC_DIR is set in the deployed layout, where public_html is a sibling
+# of the app rather than a child. Unset in development, where it is public/.
+PUBLICDIR=$(envval PUBLIC_DIR)
+case "$PUBLICDIR" in
+  "")  WEBROOT="$APP/public" ;;
+  /*)  WEBROOT="$PUBLICDIR" ;;
+  *)   WEBROOT="$APP/$PUBLICDIR" ;;
+esac
 
 # mariadb, mysql, or Homebrew's keg-only build — whichever is present.
 MYSQL=$(command -v mariadb || command -v mysql || echo /opt/homebrew/opt/mariadb/bin/mariadb)
@@ -257,8 +269,8 @@ check "the WebP set is smaller than the JPEG" "yes" "$([ "$(echo "$U" | j "data.
 
 IMGID=$(echo "$U" | j "data.files.0.publicId")
 IMGURL=$(echo "$U" | j "data.files.0.variants.0.url")
-check "the rendition is served" "200" "$(curl -s -o /dev/null -w '%{http_code}' "http://127.0.0.1:8080$IMGURL")"
-check "it is served as WebP" "image/webp" "$(curl -s -o /dev/null -w '%{content_type}' "http://127.0.0.1:8080$IMGURL")"
+check "the rendition is served" "200" "$(curl -s -o /dev/null -w '%{http_code}' "$SITE$IMGURL")"
+check "it is served as WebP" "image/webp" "$(curl -s -o /dev/null -w '%{content_type}' "$SITE$IMGURL")"
 check "/images/:id redirects to the full size" "302" "$(curl -s -o /dev/null -w '%{http_code}' "$BASE/images/$IMGID")"
 check "?w= picks the matching rendition" "yes" "$(curl -s -o /dev/null -w '%{redirect_url}' "$BASE/images/$IMGID?w=320" | grep -q 'w320.webp' && echo yes || echo no)"
 
@@ -267,11 +279,11 @@ check "?w= picks the matching rendition" "yes" "$(curl -s -o /dev/null -w '%{red
 check "text renamed .jpg is refused" "422" "$(upcode "$FIX/fake.jpg" "$TOKEN")"
 check "a PHP shell renamed .jpg is refused" "422" "$(upcode "$FIX/shell.php.jpg" "$TOKEN")"
 check "a truncated JPEG is refused" "422" "$(upcode "$FIX/truncated.jpg" "$TOKEN")"
-check "no shell reached the uploads folder" "0" "$(find "$APP/public/uploads" -name '*.php*' 2>/dev/null | wc -l | tr -d ' ')"
+check "no shell reached the uploads folder" "0" "$(find "$WEBROOT/uploads" -name '*.php*' 2>/dev/null | wc -l | tr -d ' ')"
 
 check "a stranger cannot delete the image" "403" "$(code DELETE "/images/$IMGID" "" "$OTHERTOKEN")"
 check "the uploader can" "200" "$(code DELETE "/images/$IMGID" "" "$TOKEN")"
-check "the files are gone with it" "404" "$(curl -s -o /dev/null -w '%{http_code}' "http://127.0.0.1:8080$IMGURL")"
+check "the files are gone with it" "404" "$(curl -s -o /dev/null -w '%{http_code}' "$SITE$IMGURL")"
 rm -rf "$FIX"
 
 echo

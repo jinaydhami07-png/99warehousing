@@ -39,7 +39,27 @@ Write down all three values with their prefixes. They go in `config/.env`.
 
 ---
 
-## 2. Decide where the files go
+## 2. Get the package
+
+A ready-to-upload build is at **`dist/99warehousing-php-cpanel.zip`** (and
+unzipped at `dist/99warehousing-php/`). It is already split into the two
+folders the server needs, so there is no rearranging to do by hand.
+
+Rebuild it after any change with:
+
+```bash
+php bin/build-package.php
+```
+
+It contains `config/.env.example` and never your own `config/.env`, and no
+images you uploaded locally.
+
+If you would rather arrange it yourself, skip to the layouts below and work
+from the source tree instead.
+
+---
+
+## 3. Decide where the files go
 
 **Preferred — application above the web root:**
 
@@ -73,17 +93,20 @@ The instructions below assume the **preferred** layout.
 
 ---
 
-## 3. Upload
+## 4. Upload
 
 cPanel → **File Manager**, or FTP.
 
-1. Zip this folder on your computer, upload the zip, and use *Extract*.
-   Uploading ~40 files one at a time through File Manager is slow and it is
-   easy to miss one.
-2. Move the **contents** of `public/` into `public_html` — the HTML files,
-   `assets/`, `uploads/`, `api.php` and the `.htaccess`.
-3. Leave `app/`, `config/`, `database/`, `bin/` and `storage/` where they
-   are, one level above `public_html`.
+1. Upload `99warehousing-php-cpanel.zip` to your home directory and use
+   *Extract*. Uploading ~100 files one at a time through File Manager is
+   slow and it is easy to miss one.
+2. Move the **contents** of `99warehousing-php/public_html/` into your real
+   `public_html` — the HTML files, `assets/`, `uploads/`, `api.php` and the
+   `.htaccess`. The contents, not the folder: ending up with
+   `public_html/public_html` gives you a site that 404s.
+3. Move `99warehousing-php/99warehousing-app/` to your home directory, so it
+   sits *beside* `public_html` rather than inside it.
+4. Delete the now-empty `99warehousing-php/` and the zip.
 
 **Check that `.htaccess` came across.** File Manager hides dotfiles by
 default: *Settings* → tick **Show Hidden Files (dotfiles)**. Without
@@ -92,10 +115,18 @@ will look like the API is down.
 
 ---
 
-## 4. Configure
+## 5. Configure
 
-Copy `config/.env.example` to `config/.env` (File Manager → *Copy*), then
-edit it:
+Copy `99warehousing-app/config/.env.example` to `config/.env`
+(File Manager → *Copy*), then edit it.
+
+`PUBLIC_DIR` is already set to `../public_html` in the packaged example and
+is correct for the layout above — it is how the app knows where to write
+uploaded photos. Change it only if you put the two folders somewhere else.
+Get it wrong and uploads succeed but every photo 404s, because the files
+land somewhere Apache never serves.
+
+The rest:
 
 ```ini
 APP_ENV=production
@@ -143,7 +174,7 @@ Behind Cloudflare, set `TRUST_PROXY=1`. Direct to GoDaddy, leave it `0`.
 
 ---
 
-## 5. Create the tables
+## 6. Create the tables
 
 With SSH:
 
@@ -170,7 +201,7 @@ invented prices.
 
 ---
 
-## 6. Permissions
+## 7. Permissions
 
 `public_html/uploads` must be writable — `755` is normally right on cPanel,
 where PHP runs as your own account. Use `775` only if uploads fail with a
@@ -181,7 +212,7 @@ to the account's PHP error log rather than failing the request.
 
 ---
 
-## 7. Check it
+## 8. Check it
 
 Load `https://99warehousing.com/api/v1/health`. You want:
 
@@ -208,12 +239,13 @@ The first `/auth/admin` sign-in creates the admin account automatically.
 | `{"success":false,...database unavailable}` | `DB_*` wrong, or the user has no privileges on the database |
 | Signed in, then immediately signed out | Apache is stripping `Authorization`; the rewrite in `.htaccess` restores it — confirm the file is intact |
 | Blank white page | PHP fatal error. Read `storage/logs/app.log` and the cPanel error log |
+| Uploads work but photos 404 | `PUBLIC_DIR` points somewhere Apache does not serve. Check `/api/v1/health/media` |
 | Uploads fail over ~2 MB | `upload_max_filesize` / `post_max_size` in *Select PHP Version* → *Options*. Set both ≥ `MEDIA_MAX_MB` |
 | 500 immediately after deploying | A production configuration check refused to start. The log names the setting |
 
 ---
 
-## 8. After it works
+## 9. After it works
 
 - Delete anything you used to generate secrets.
 - Remove the install cron job if you have not already.

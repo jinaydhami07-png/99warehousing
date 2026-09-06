@@ -57,7 +57,7 @@ final class SystemController
      */
     public static function healthMedia(Request $request): void
     {
-        $dir = APP_ROOT . '/public/' . trim((string) Env::get('media.dir', 'uploads'), '/');
+        $dir = Env::get('publicDir') . '/' . trim((string) Env::get('media.dir', 'uploads'), '/');
 
         $exists = is_dir($dir);
         /* is_writable() can disagree with reality under some ACL and
@@ -77,7 +77,11 @@ final class SystemController
         Response::success([
             'driver' => 'local',
             'ok' => $ok,
-            'directory' => 'public/' . trim((string) Env::get('media.dir', 'uploads'), '/'),
+            /* The configured name only — never the absolute path. This
+               endpoint is public, and the server's filesystem layout is not
+               something to hand out. "uploads is not writable" is the whole
+               of what an operator needs; where it lives they already know. */
+            'directory' => trim((string) Env::get('media.dir', 'uploads'), '/'),
             'exists' => $exists,
             'writable' => $writable,
             'freeMB' => $free === false ? null : (int) round($free / 1024 / 1024),

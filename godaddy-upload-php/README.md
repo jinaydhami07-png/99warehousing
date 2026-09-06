@@ -149,6 +149,33 @@ admin route cannot drift apart.
 
 ---
 
+## Building the deploy package
+
+```bash
+php bin/build-package.php
+```
+
+Writes an upload-ready build to the repository's `dist/`:
+
+```
+dist/99warehousing-php/
+├── public_html/            → upload the CONTENTS into public_html
+└── 99warehousing-app/      → upload one level ABOVE public_html
+dist/99warehousing-php-cpanel.zip
+```
+
+The split is the point. In the source tree `public/` sits inside the
+project because that is convenient to develop in; on the server it has to
+be the other way round, with the application — `config/.env` above all —
+outside the web root. Doing that split by hand at deploy time is a step
+that gets forgotten, and forgetting it publishes the database password.
+
+The package ships `.env.example` with `PUBLIC_DIR=../public_html` already
+set, and never your own `config/.env` or anything under `uploads/`.
+
+`api.php` finds the application in either layout, so the same file works
+in development and on the server.
+
 ## Deployment
 
 See **[DEPLOY-TO-GODADDY.md](DEPLOY-TO-GODADDY.md)**.
@@ -179,6 +206,13 @@ through the real pages in a browser, against this backend:
   exactly the expected dimensions, with a real `srcset` on the card
 - owner contact details behind a session, and written to the audit log
 - no console errors on any page visited
+
+The **deployed layout was tested as a layout**, not just assumed: the built
+package was unpacked into a simulated server home with `public_html` beside
+the application, configured from the shipped `.env.example`, and the full
+101-assertion suite run against it — all passing. Uploads landed in
+`public_html/uploads` where Apache serves them, and nothing was written
+inside the application folder.
 
 `/api/v1` is **route-for-route identical** to the Node build: all 54
 endpoints, verified by diffing the two route tables.

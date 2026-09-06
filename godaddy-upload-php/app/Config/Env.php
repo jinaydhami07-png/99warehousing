@@ -154,6 +154,26 @@ final class Env
             'appUrl' => rtrim((string) $get('APP_URL', 'http://localhost:8080'), '/'),
             'logLevel' => $get('LOG_LEVEL', 'info'),
             'logFile' => $get('LOG_FILE', APP_ROOT . '/storage/logs/app.log'),
+
+            /* ── Where the web root actually is ───────────────────────────
+               Uploaded images are written under it and served from it by
+               Apache, so the app has to know the real path — and it is NOT
+               always APP_ROOT/public.
+
+               In the recommended cPanel layout the application sits OUTSIDE
+               the web root, as a sibling of public_html rather than its
+               parent, so nothing but the site itself is reachable over HTTP.
+               Assuming APP_ROOT/public there writes uploads into a directory
+               Apache never serves: the upload succeeds, the row is written,
+               and every photo 404s.
+
+               Resolved in three steps, most explicit first:
+                 1. PUBLIC_DIR in the environment — set by the deploy package
+                 2. the PUBLIC_ROOT constant, which api.php defines from its
+                    own location, so the web path is right even unconfigured
+                 3. APP_ROOT/public, the development layout
+               ───────────────────────────────────────────────────────────── */
+            'publicDir' => self::resolvePublicDir($get('PUBLIC_DIR')),
             /* Number of reverse proxies in front of the app. Never a boolean:
                trusting a client-supplied X-Forwarded-For would let anyone
                spoof their IP and walk straight through the rate limiter. */
@@ -290,6 +310,36 @@ final class Env
         if ($problems) {
             self::fail("Refusing to start in production:\n    • " . implode("\n    • ", $problems));
         }
+    }
+
+    /**
+     * Absolute path to the directory the web server serves.
+     *
+     * A relative PUBLIC_DIR is taken as relative to APP_ROOT, so a config
+     * file can say `PUBLIC_DIR=../public_html` without hardcoding the
+     * account's home directory — which differs between hosts and would have
+     * to be edited on every move.
+     */
+    private static function resolvePublicDir(?string $configured): string
+    {
+        if ($configured !== null && $configured !== '') {
+            $path = rtrim($configured, '/');
+            if ($path[0] !== '/' && !preg_match('#^[A-Za-z]:[\\\\/]#', $path)) {
+                $path = APP_ROOT . '/' . $path;
+            }
+            /* realpath() collapses the ../ and confirms it exists. If it
+               does not, keep the literal path: the health check reports a
+               missing upload directory far more usefully than a silent
+               fallback to a directory that happens to exist. */
+            $real = realpath($path);
+            return $real !== false ? $real : $path;
+        }
+
+        if (defined('PUBLIC_ROOT')) {
+            return rtrim((string) PUBLIC_ROOT, '/');
+        }
+
+        return APP_ROOT . '/public';
     }
 
     /**

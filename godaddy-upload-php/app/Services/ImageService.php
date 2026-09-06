@@ -109,7 +109,7 @@ final class ImageService
             $id
         );
 
-        $absolute = APP_ROOT . '/public/' . $folder;
+        $absolute = Env::get('publicDir') . '/' . $folder;
         if (!is_dir($absolute) && !@mkdir($absolute, 0755, true) && !is_dir($absolute)) {
             Logger::error('Could not create upload directory', ['dir' => $absolute]);
             throw ApiError::internal('Could not store the upload');
@@ -614,7 +614,7 @@ final class ImageService
                 Logger::warn('Refused to delete a file outside the media directory', ['path' => $path]);
                 continue;
             }
-            $absolute = APP_ROOT . '/public/' . $path;
+            $absolute = Env::get('publicDir') . '/' . $path;
             if (is_file($absolute)) {
                 @unlink($absolute);
             }

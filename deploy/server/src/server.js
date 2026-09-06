@@ -51,9 +51,18 @@ async function start() {
   }
 
   server = app.listen(env.port, () => {
+    /* env.port is a port number normally, but a Unix socket path when
+       Passenger supplies one. Printing "http://localhost:/tmp/x.sock" for the
+       socket case is the kind of line that sends you debugging the wrong
+       thing in cPanel's stderr.log. */
+    const where =
+      typeof env.port === 'number'
+        ? `http://localhost:${env.port}`
+        : `unix socket ${env.port}`;
+
     logger.info(
       { port: env.port, env: env.nodeEnv, pid: process.pid },
-      `API listening on http://localhost:${env.port}`
+      `API listening on ${where}`
     );
   });
 

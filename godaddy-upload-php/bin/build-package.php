@@ -161,10 +161,21 @@ $example = str_replace(
 );
 file_put_contents("$app/config/.env.example", $example);
 
+/* ── The installation card, at the top level ──
+   Same instructions as the .txt below, laid out to be read. Both ship: the
+   HTML is what you open after unzipping, the .txt is what you can still
+   read over SSH or FTP with no browser. */
+copy($root . '/package/index.html', $out . '/index.html');
+say('  index.html              installation card');
+
 /* ── A note at the top level, for whoever opens the zip ── */
 file_put_contents($out . '/READ-ME-FIRST.txt', <<<TXT
 99Warehousing — PHP build
 =========================
+
+Open index.html (beside this file) for the same instructions,
+laid out to be read. This copy is here for when you only have
+FTP or a terminal.
 
 Two folders. They go in DIFFERENT places.
 

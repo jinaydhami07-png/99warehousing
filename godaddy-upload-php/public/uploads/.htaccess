@@ -1,0 +1,30 @@
+# Uploaded images live here. Nothing in this directory may ever execute.
+#
+# The upload path already makes a hostile file very hard to place: the type
+# is sniffed from the leading bytes rather than believed from the browser's
+# Content-Type, and every accepted image is re-encoded to WebP, which does
+# not preserve a payload. This file is the layer that does not depend on any
+# of that being right.
+
+<IfModule mod_php.c>
+  php_flag engine off
+</IfModule>
+
+# php_flag is unavailable under PHP-FPM / FastCGI, which is what most cPanel
+# accounts run. Removing the handler is what actually works there.
+<IfModule mod_mime.c>
+  RemoveHandler .php .php3 .php4 .php5 .php7 .php8 .phtml .phar .cgi .pl .py
+  RemoveType .php .php3 .php4 .php5 .php7 .php8 .phtml .phar
+</IfModule>
+
+<FilesMatch "\.(php[0-9]?|phtml|phar|cgi|pl|py|sh|shtml)$">
+  <IfModule mod_authz_core.c>
+    Require all denied
+  </IfModule>
+  <IfModule !mod_authz_core.c>
+    Order allow,deny
+    Deny from all
+  </IfModule>
+</FilesMatch>
+
+Options -Indexes -ExecCGI

@@ -1,0 +1,21 @@
+# Deny all web access to this directory.
+#
+# The application source and its configuration are meant to live OUTSIDE
+# public_html. If they end up inside — which is easy to do by accident on a
+# cPanel account, where uploading one folder is the simplest thing to do —
+# Apache would serve every file here as plain text, including config/.env
+# with the database password in it.
+#
+# PHP reads these files from disk and never goes through Apache, so denying
+# HTTP access costs the application nothing.
+
+# Apache 2.4
+<IfModule mod_authz_core.c>
+  Require all denied
+</IfModule>
+
+# Apache 2.2 and older
+<IfModule !mod_authz_core.c>
+  Order allow,deny
+  Deny from all
+</IfModule>

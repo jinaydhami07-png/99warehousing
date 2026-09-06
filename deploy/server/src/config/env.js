@@ -57,7 +57,18 @@ const csv = (v) =>
 
 const schema = z.object({
   NODE_ENV: z.enum(['development', 'test', 'production']).default('development'),
-  PORT: z.coerce.number().int().positive().default(5000),
+  /* Usually a port number. But Phusion Passenger — what cPanel's "Setup
+     Node.js App" runs behind — hands some configurations a Unix socket PATH
+     in PORT instead. z.coerce.number() turns that into NaN, .int() then
+     rejects it, and the app refuses to start with a validation error that
+     says nothing about the real cause: a 503 in cPanel and no obvious reason
+     in stderr.log.
+
+     Accept both. net.Server#listen takes a pipe/socket path just as happily
+     as a port, so passing the raw string through is all that is needed. */
+  PORT: z
+    .union([z.coerce.number().int().positive(), z.string().min(1)])
+    .default(5000),
 
   /* Never hardcoded, never committed — see .env.example */
   MONGODB_URI: required('MONGODB_URI'),

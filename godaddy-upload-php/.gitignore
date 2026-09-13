@@ -1,0 +1,12 @@
+# Real configuration — secrets. Only .env.example belongs in the repository.
+config/.env
+
+# Runtime output.
+storage/logs/*.log
+
+# Uploaded images. User data, not source.
+public/uploads/*
+!public/uploads/.htaccess
+!public/uploads/README.md
+
+.DS_Store

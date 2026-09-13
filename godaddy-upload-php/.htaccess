@@ -1,0 +1,17 @@
+# Deny all web access to the application root.
+#
+# Only public/ is meant to be reachable over HTTP. This is the catch-all for
+# the case where the whole folder is uploaded into public_html: without it,
+# https://the-site/config/.env would return the database password as plain
+# text.
+#
+# public/ carries its own .htaccess, which re-enables what belongs there.
+
+<IfModule mod_authz_core.c>
+  Require all denied
+</IfModule>
+
+<IfModule !mod_authz_core.c>
+  Order allow,deny
+  Deny from all
+</IfModule>

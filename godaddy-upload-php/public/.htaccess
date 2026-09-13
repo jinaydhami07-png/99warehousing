@@ -1,0 +1,101 @@
+# ═══════════════════════════════════════════════════════════════
+#  99Warehousing — Apache configuration for the site root
+#  Upload the CONTENTS of this public/ folder into public_html.
+# ═══════════════════════════════════════════════════════════════
+
+# ── Front controller ──────────────────────────────────────────
+# Everything under /api/v1/ goes to api.php, which reads the original
+# REQUEST_URI to work out the route. Static files and the HTML pages are
+# untouched and are served by Apache directly — no PHP process per page,
+# which is the main reason this port is faster than the Node build on
+# shared hosting.
+<IfModule mod_rewrite.c>
+  RewriteEngine On
+
+  # Some Apache/FastCGI combinations strip the Authorization header before
+  # PHP sees it, which silently breaks every authenticated request — the
+  # token is sent, and the server acts as though the user is signed out.
+  # Re-attach it. Request::bearerToken() reads either spelling.
+  RewriteCond %{HTTP:Authorization} .
+  RewriteRule .* - [E=HTTP_AUTHORIZATION:%{HTTP:Authorization}]
+
+  RewriteRule ^api/v1(/.*)?$ api.php [QSA,L]
+</IfModule>
+
+# ── Directory index ───────────────────────────────────────────
+# index.html, not api.php — "/" is the website.
+DirectoryIndex index.html index.php
+
+# Never list a directory's contents.
+Options -Indexes
+
+
+# ── Security headers for the HTML pages ───────────────────────
+# api.php sets its own on API responses; these cover the static pages,
+# which Apache serves without PHP ever running.
+<IfModule mod_headers.c>
+  Header always set X-Content-Type-Options "nosniff"
+  Header always set X-Frame-Options "DENY"
+  Header always set Referrer-Policy "strict-origin-when-cross-origin"
+
+  # Uncomment once the site is served over HTTPS. Sending it over plain
+  # http poisons the browser's cache for a year and locks people out.
+  # Header always set Strict-Transport-Security "max-age=31536000; includeSubDomains"
+</IfModule>
+
+
+# ── Caching ───────────────────────────────────────────────────
+<IfModule mod_expires.c>
+  ExpiresActive On
+
+  # Uploaded renditions are immutable: an edit produces a new file under a
+  # new id, so nothing at a given URL ever changes.
+  <FilesMatch "\.(webp|avif)$">
+    ExpiresDefault "access plus 1 year"
+    Header append Cache-Control "immutable"
+  </FilesMatch>
+
+  <FilesMatch "\.(jpg|jpeg|png|gif|svg|ico|woff2?)$">
+    ExpiresDefault "access plus 30 days"
+  </FilesMatch>
+
+  # CSS and JS are edited in place under the same name, so a long cache
+  # here would leave visitors on an old build after a deploy.
+  <FilesMatch "\.(css|js)$">
+    ExpiresDefault "access plus 1 hour"
+  </FilesMatch>
+
+  # HTML is never cached: a stale page can reference assets that are gone.
+  <FilesMatch "\.html$">
+    ExpiresDefault "access plus 0 seconds"
+  </FilesMatch>
+</IfModule>
+
+<IfModule mod_deflate.c>
+  AddOutputFilterByType DEFLATE text/html text/css text/plain text/xml \
+      application/javascript application/json image/svg+xml
+</IfModule>
+
+
+# ── Nothing executes inside the upload directory ──────────────
+# Uploads are checked on the way in — the type is sniffed from the leading
+# bytes and every file is re-encoded to WebP, so a .php cannot survive the
+# process. This is the second lock on that door: even if something did get
+# written there, Apache must not run it.
+<IfModule mod_rewrite.c>
+  RewriteCond %{REQUEST_URI} ^/uploads/ [NC]
+  RewriteCond %{REQUEST_URI} \.(php[0-9]?|phtml|phar|cgi|pl|py|sh|htaccess)$ [NC]
+  RewriteRule .* - [F,L]
+</IfModule>
+
+
+# ── Dotfiles are never served ─────────────────────────────────
+<FilesMatch "^\.">
+  <IfModule mod_authz_core.c>
+    Require all denied
+  </IfModule>
+  <IfModule !mod_authz_core.c>
+    Order allow,deny
+    Deny from all
+  </IfModule>
+</FilesMatch>

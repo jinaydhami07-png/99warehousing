@@ -19,10 +19,59 @@ const database = require('./config/database');
 
 let server;
 
+/* Keeps trying after a failed initial connection. The driver retries on its
+   own once it has connected at least once, but not before — so without this a
+   boot-time failure stays broken until someone restarts the app by hand.
+   Backs off to a minute so a long outage does not fill stderr.log. */
+function retryDatabaseInBackground() {
+  let delay = 5_000;
+
+  const attempt = () => {
+    setTimeout(async () => {
+      try {
+        await database.connect();
+        logger.info('MongoDB connected on retry — the API is live');
+      } catch (err) {
+        delay = Math.min(delay * 2, 60_000);
+        logger.warn(
+          { err: err.message, nextAttemptInMs: delay },
+          'MongoDB still unreachable'
+        );
+        attempt();
+      }
+      // unref: a pending retry must never hold the process open during shutdown.
+    }, delay).unref();
+  };
+
+  attempt();
+}
+
 async function start() {
-  // Await the connection: if the database is unreachable, fail at boot with
-  // a clear message rather than surfacing 500s to the first users.
-  await database.connect();
+  /* Connect before listening when we can, so the first request never hits a
+     cold database. But a failure here must not take the whole site down.
+
+     Under cPanel/Passenger a rejected boot means process.exit(1), and
+     Passenger then answers every request with 503 — static pages and
+     /api/v1/health included. The usual cause is the Atlas IP allowlist, and
+     the one endpoint that would tell you so is the one that stops answering.
+
+     So: try, and on failure say exactly what to check, start the server
+     anyway, and keep retrying underneath. Pages stay up, health reports
+     "disconnected", and the site heals itself once Network Access is fixed —
+     without anyone having to find Restart in cPanel. */
+  try {
+    await database.connect();
+  } catch (err) {
+    logger.fatal(
+      { err: err.message },
+      'MongoDB unreachable at startup. Pages will still serve, but every API ' +
+        'request fails until it connects. On cPanel this is almost always the ' +
+        'Atlas IP allowlist: Atlas -> Network Access -> Add IP Address, using ' +
+        'the Shared IP Address from the cPanel home page. Retrying in the ' +
+        'background — no restart needed once it is fixed.'
+    );
+    retryDatabaseInBackground();
+  }
 
   /* Say where images are going, at boot, every time. Whether uploads land in
      S3 or fall back to MongoDB depends on two environment variables, and a

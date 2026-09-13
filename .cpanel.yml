@@ -1,0 +1,41 @@
+---
+# cPanel Git Version Control — deployment for the Node.js application.
+#
+# cPanel clones this repository to a "Repository Path" of its choosing, then
+# runs these tasks. They copy the BUILT app (godaddy-upload/) into the
+# application root that "Setup Node.js App" points at.
+#
+# Two things this deliberately does NOT do:
+#
+#   1. It never touches server/env. That file holds the live database
+#      password and is not in this repository at all — it is uploaded to the
+#      server once, by hand, and must survive every deployment. Wiping it on
+#      deploy is how a working site turns into a 503.
+#
+#   2. It never copies node_modules. Those are built on the server by
+#      "Run NPM Install", because they contain compiled binaries that have to
+#      match the server's own Linux.
+#
+# $HOME is used rather than a hardcoded /home/<user> path, so there is nothing
+# to edit before the first deploy. If your cPanel runs these tasks without a
+# shell environment, replace $HOME with /home/<your-cpanel-username>.
+deployment:
+  tasks:
+    - export DEPLOYPATH=$HOME/99warehousing
+    - /bin/mkdir -p $DEPLOYPATH/server
+
+    # Application root files
+    - /bin/cp -f godaddy-upload/app.js $DEPLOYPATH/
+    - /bin/cp -f godaddy-upload/package.json $DEPLOYPATH/
+    - /bin/cp -f godaddy-upload/package-lock.json $DEPLOYPATH/
+    - /bin/cp -f godaddy-upload/.htaccess $DEPLOYPATH/
+
+    # The website. Replaced wholesale so deleted pages do not linger.
+    - /bin/rm -rf $DEPLOYPATH/public
+    - /bin/cp -R godaddy-upload/public $DEPLOYPATH/
+
+    # API source. Same reasoning — replaced, not merged.
+    - /bin/rm -rf $DEPLOYPATH/server/src
+    - /bin/cp -R godaddy-upload/server/src $DEPLOYPATH/server/
+    - /bin/cp -f godaddy-upload/server/.htaccess $DEPLOYPATH/server/
+    - /bin/cp -f godaddy-upload/server/.env.example $DEPLOYPATH/server/

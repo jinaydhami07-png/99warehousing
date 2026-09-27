@@ -1,0 +1,442 @@
+<title>99Warehousing PHP Setup</title>
+<meta name="description" content="Where the two folders go, and the four steps to get the site running on cPanel.">
+
+<!-- Newsreader for the printed-leaflet feel this is (it ships in a box);
+     IBM Plex Sans for body; IBM Plex Mono for the paths, which are most of
+     the page. Real fallbacks throughout: this file is opened off a disk
+     right after a download, sometimes with no network. -->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans:wght@400;500;600&family=Newsreader:opsz,wght@6..72,400;6..72,500;6..72,600&display=swap">
+
+<style>
+  /* ── Tokens: complete light palette on bare :root ──
+     Neutrals carry a faint green-blue bias so they sit with the pine
+     accent instead of reading as unconsidered grey. */
+  :root {
+    --ground:      #FAFAF8;
+    --surface:     #FFFFFF;
+    --surface-sunk:#F3F4F1;
+    --ink:         #1A1F1D;
+    --ink-soft:    #59615C;
+    --ink-faint:   #868D88;
+    --rule:        #E4E5E0;
+    --rule-strong: #CBCDC6;
+
+    /* The two folders are colour-coded, and that coding is the whole
+       navigational idea of this page — wherever a folder is named, its
+       colour says which of the two it is. */
+    --web:         #10564C;   /* public_html — the site */
+    --web-wash:    #E7F0ED;
+    --app:         #8A4420;   /* the application — kept out of the web root */
+    --app-wash:    #F6EBE3;
+
+    --warn:        #8A4420;
+    --warn-wash:   #F9F0E9;
+    --good:        #2C6E49;
+
+    --shadow: 0 1px 2px rgba(26,31,29,.05), 0 8px 24px -12px rgba(26,31,29,.14);
+  }
+
+  /* Un-stamped document following a dark OS. Guarded so an explicit
+     light choice still wins. Tokens only — never component rules. */
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --ground:      #141715;
+      --surface:     #1C201E;
+      --surface-sunk:#232825;
+      --ink:         #EDEFEC;
+      --ink-soft:    #A7ADA8;
+      --ink-faint:   #7C837E;
+      --rule:        #2E332F;
+      --rule-strong: #414640;
+
+      --web:         #6FC5B0;
+      --web-wash:    #17322D;
+      --app:         #E0996B;
+      --app-wash:    #33221A;
+
+      --warn:        #E0996B;
+      --warn-wash:   #2E211A;
+      --good:        #7FC79B;
+
+      --shadow: 0 1px 2px rgba(0,0,0,.3), 0 8px 24px -12px rgba(0,0,0,.55);
+    }
+  }
+
+  /* Explicit dark choice wins over a light OS. */
+  :root[data-theme="dark"] {
+    --ground:      #141715;
+    --surface:     #1C201E;
+    --surface-sunk:#232825;
+    --ink:         #EDEFEC;
+    --ink-soft:    #A7ADA8;
+    --ink-faint:   #7C837E;
+    --rule:        #2E332F;
+    --rule-strong: #414640;
+
+    --web:         #6FC5B0;
+    --web-wash:    #17322D;
+    --app:         #E0996B;
+    --app-wash:    #33221A;
+
+    --warn:        #E0996B;
+    --warn-wash:   #2E211A;
+    --good:        #7FC79B;
+
+    --shadow: 0 1px 2px rgba(0,0,0,.3), 0 8px 24px -12px rgba(0,0,0,.55);
+  }
+
+  * { box-sizing: border-box; }
+
+  body {
+    background: var(--ground);
+    color: var(--ink);
+    font: 400 16px/1.65 "IBM Plex Sans", ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
+    margin: 0;
+    padding: 40px 24px 88px;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  .sheet { max-width: 720px; margin: 0 auto; }
+
+  code, pre, .path {
+    font-family: "IBM Plex Mono", ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  }
+
+  /* ── Masthead ── */
+  .masthead {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    gap: 8px 14px;
+    padding-bottom: 18px;
+    border-bottom: 2px solid var(--ink);
+  }
+  .masthead h1 {
+    font: 500 30px/1.15 Newsreader, ui-serif, Georgia, "Times New Roman", serif;
+    letter-spacing: -.01em;
+    margin: 0;
+    text-wrap: balance;
+  }
+  .masthead .edition {
+    font-size: 11px;
+    letter-spacing: .1em;
+    text-transform: uppercase;
+    color: var(--ink-faint);
+    margin-left: auto;
+  }
+  .standfirst {
+    font-size: 17px;
+    color: var(--ink-soft);
+    margin: 18px 0 0;
+    max-width: 60ch;
+  }
+
+  /* ── Requirements strip ──
+     Not cards: a plain ruled list. These are conditions to check once,
+     not objects to browse. */
+  .reqs {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0 28px;
+    margin: 26px 0 0;
+    padding: 14px 0;
+    border-top: 1px solid var(--rule);
+    border-bottom: 1px solid var(--rule);
+    list-style: none;
+  }
+  .reqs li {
+    font-size: 13.5px;
+    color: var(--ink-soft);
+    display: flex;
+    align-items: baseline;
+    gap: 7px;
+  }
+  .reqs .k {
+    font-size: 10.5px;
+    letter-spacing: .09em;
+    text-transform: uppercase;
+    color: var(--ink-faint);
+  }
+  .reqs .v { font-family: "IBM Plex Mono", ui-monospace, Menlo, monospace; color: var(--ink); }
+
+  /* ── The tree: this page's thesis ── */
+  .tree-block {
+    margin: 34px 0 0;
+    background: var(--surface);
+    border: 1px solid var(--rule);
+    border-radius: 10px;
+    box-shadow: var(--shadow);
+    overflow: hidden;
+  }
+  .tree-head {
+    padding: 15px 20px 13px;
+    border-bottom: 1px solid var(--rule);
+    background: var(--surface-sunk);
+  }
+  .tree-head h2 {
+    font: 500 15px/1.3 "IBM Plex Sans", system-ui, sans-serif;
+    margin: 0;
+  }
+  .tree-head p {
+    margin: 4px 0 0;
+    font-size: 13px;
+    color: var(--ink-soft);
+  }
+  .tree-scroll { overflow-x: auto; }
+  pre.tree {
+    margin: 0;
+    padding: 20px;
+    font-size: 13.5px;
+    line-height: 1.85;
+    color: var(--ink-soft);
+    white-space: pre;
+  }
+  pre.tree b { font-weight: 600; }
+  .n-web { color: var(--web); }
+  .n-app { color: var(--app); }
+  .note { color: var(--ink-faint); }
+
+  /* ── Steps: a real sequence — order changes the outcome ── */
+  ol.steps {
+    list-style: none;
+    counter-reset: step;
+    margin: 44px 0 0;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 30px;
+  }
+  ol.steps > li {
+    counter-increment: step;
+    display: grid;
+    grid-template-columns: 34px 1fr;
+    gap: 0 16px;
+    align-items: start;
+  }
+  ol.steps > li::before {
+    content: counter(step);
+    grid-row: 1 / span 2;
+    font: 500 15px/32px Newsreader, ui-serif, Georgia, serif;
+    text-align: center;
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    border: 1px solid var(--rule-strong);
+    color: var(--ink-soft);
+    background: var(--surface);
+  }
+  ol.steps h3 {
+    font: 500 19px/1.3 Newsreader, ui-serif, Georgia, "Times New Roman", serif;
+    margin: 3px 0 0;
+    text-wrap: balance;
+  }
+  ol.steps .body { grid-column: 2; }
+  ol.steps p { margin: 8px 0 0; color: var(--ink-soft); max-width: 62ch; }
+  ol.steps p:first-child { margin-top: 8px; }
+
+  /* Folder chips carry the tree's colour coding into the prose. */
+  .chip {
+    display: inline-block;
+    font-family: "IBM Plex Mono", ui-monospace, Menlo, monospace;
+    font-size: .87em;
+    font-weight: 500;
+    padding: 1px 6px;
+    border-radius: 4px;
+    white-space: nowrap;
+  }
+  .chip-web { color: var(--web); background: var(--web-wash); }
+  .chip-app { color: var(--app); background: var(--app-wash); }
+
+  code:not(.chip) {
+    font-size: .88em;
+    background: var(--surface-sunk);
+    padding: 1px 5px;
+    border-radius: 4px;
+    color: var(--ink);
+  }
+
+  pre.cmd {
+    margin: 12px 0 0;
+    padding: 12px 15px;
+    background: var(--surface-sunk);
+    border: 1px solid var(--rule);
+    border-radius: 7px;
+    font-size: 13px;
+    overflow-x: auto;
+    color: var(--ink);
+  }
+
+  /* ── The one mistake that actually happens ── */
+  .pitfall {
+    margin: 14px 0 0;
+    padding: 13px 16px;
+    background: var(--warn-wash);
+    border-left: 2px solid var(--warn);
+    border-radius: 0 7px 7px 0;
+    font-size: 14.5px;
+    color: var(--ink-soft);
+  }
+  .pitfall b { color: var(--warn); font-weight: 600; }
+
+  .compare {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px 22px;
+    margin: 10px 0 0;
+    font-family: "IBM Plex Mono", ui-monospace, Menlo, monospace;
+    font-size: 13px;
+  }
+  .compare span { display: flex; align-items: baseline; gap: 7px; }
+  .mark { font-weight: 600; }
+  .yes { color: var(--good); }
+  .no  { color: var(--warn); }
+
+  /* ── Closing ── */
+  .colophon {
+    margin: 52px 0 0;
+    padding-top: 18px;
+    border-top: 1px solid var(--rule);
+    font-size: 14px;
+    color: var(--ink-soft);
+    display: flex;
+    flex-direction: column;
+    gap: 7px;
+  }
+  .colophon b { color: var(--ink); font-weight: 500; }
+
+  @media (max-width: 540px) {
+    body { padding: 28px 16px 64px; }
+    .masthead .edition { margin-left: 0; width: 100%; }
+    ol.steps > li { grid-template-columns: 26px 1fr; gap: 0 12px; }
+    ol.steps > li::before { width: 26px; height: 26px; line-height: 26px; font-size: 13px; }
+  }
+</style>
+
+<div class="sheet">
+
+  <header class="masthead">
+    <h1>99Warehousing PHP</h1>
+    <span class="edition">Installation card</span>
+  </header>
+
+  <p class="standfirst">
+    This package holds two folders. They go in <em>different places</em> on
+    your account — that separation is what keeps your database password off
+    the public web.
+  </p>
+
+  <ul class="reqs">
+    <li><span class="k">PHP</span><span class="v">7.4+</span></li>
+    <li><span class="k">Extensions</span><span class="v">pdo_mysql, gd</span></li>
+    <li><span class="k">Database</span><span class="v">MySQL 5.7+</span></li>
+    <li><span class="k">Server</span><span class="v">Apache + mod_rewrite</span></li>
+  </ul>
+
+  <section class="tree-block">
+    <div class="tree-head">
+      <h2>Where the two folders end up</h2>
+      <p>Your account after unpacking, with everything in its place.</p>
+    </div>
+    <div class="tree-scroll">
+<pre class="tree">/home/<span class="note">youraccount</span>/
+│
+├── <b class="n-web">public_html/</b>                  <span class="note">← served to the world</span>
+│   ├── index.html
+│   ├── assets/
+│   ├── uploads/               <span class="note">photos land here</span>
+│   ├── api.php
+│   └── .htaccess
+│
+└── <b class="n-app">99warehousing-app/</b>            <span class="note">← never reachable over HTTP</span>
+    ├── app/
+    ├── bin/
+    ├── config/<b class="n-app">.env</b>            <span class="note">your database password</span>
+    ├── database/
+    └── storage/</pre>
+    </div>
+  </section>
+
+  <ol class="steps">
+
+    <li>
+      <div class="body">
+        <h3>Put the folders in place</h3>
+        <p>
+          Upload the <b>contents</b> of <span class="chip chip-web">public_html/</span>
+          into your account's real <code>public_html</code>. Then upload
+          <span class="chip chip-app">99warehousing-app/</span> one level above it,
+          so the two sit side by side as shown.
+        </p>
+        <div class="pitfall">
+          <b>The contents — not the folder.</b> Dragging the folder itself in
+          gives you <code>public_html/public_html</code>, and every page on the
+          site returns 404.
+          <div class="compare">
+            <span><i class="mark yes">✓</i> public_html/index.html</span>
+            <span><i class="mark no">✗</i> public_html/public_html/index.html</span>
+          </div>
+        </div>
+      </div>
+    </li>
+
+    <li>
+      <div class="body">
+        <h3>Create the database</h3>
+        <p>
+          In cPanel → <b>MySQL&nbsp;Databases</b>, create a database and a user,
+          then add that user to the database with <b>ALL PRIVILEGES</b>. cPanel
+          prefixes both names with your account — keep the prefixes, you need
+          them next.
+        </p>
+      </div>
+    </li>
+
+    <li>
+      <div class="body">
+        <h3>Fill in the settings</h3>
+        <p>
+          Copy <code>99warehousing-app/config/.env.example</code> to
+          <code>config/.env</code> and edit it. It will not run until you do.
+          Set the four <code>DB_</code> values, your domain, an admin passkey,
+          and two <em>different</em> JWT secrets:
+        </p>
+        <pre class="cmd">php -r "echo bin2hex(random_bytes(48)), PHP_EOL;"</pre>
+        <p>
+          <code>PUBLIC_DIR</code> is already set correctly for the layout above.
+          Change it only if you put the two folders somewhere else — if it is
+          wrong, uploads appear to succeed and every photo 404s.
+        </p>
+      </div>
+    </li>
+
+    <li>
+      <div class="body">
+        <h3>Create the tables, then check it</h3>
+        <p>
+          Run the installer once. With SSH, from inside
+          <span class="chip chip-app">99warehousing-app/</span>:
+        </p>
+        <pre class="cmd">php bin/install.php</pre>
+        <p>
+          No SSH? cPanel → <b>Cron Jobs</b> can run it once — then delete the
+          cron job. Full instructions are in <code>DEPLOY-TO-GODADDY.md</code>.
+        </p>
+        <p>
+          Then open <code>/api/v1/health</code> on your domain. You want
+          <code>"database":"connected"</code>. If you get that, load the site
+          and register an account.
+        </p>
+      </div>
+    </li>
+
+  </ol>
+
+  <div class="colophon">
+    <span><b>Full guide</b> — <code>99warehousing-app/DEPLOY-TO-GODADDY.md</code>, including troubleshooting.</span>
+    <span><b>Plain-text version</b> — <code>READ-ME-FIRST.txt</code>, beside this file.</span>
+    <span><b>Turn on HTTPS before going live.</b> Sign-in cookies are marked secure in production, so accounts will not work over plain http.</span>
+  </div>
+
+</div>

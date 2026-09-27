@@ -91,7 +91,18 @@ fs.writeFileSync(
       main: 'app.js',
       engines: pkg.engines,
       scripts: { start: 'node app.js' },
-      dependencies: pkg.dependencies,
+
+      /* @aws-sdk/client-s3 is dropped from the deployed manifest.
+         It is 18MB and ~30 transitive packages, and it is never loaded:
+         storage.service.js requires it lazily and only when
+         MEDIA_DRIVER=s3, which production does not set. A missing SDK is
+         already handled there as a configuration problem — it logs once
+         and falls back to MongoDB image storage rather than crashing.
+         Shipping it only makes cPanel's "Run NPM Install" slower.
+         Add it back to server/package.json the day S3 is turned on. */
+      dependencies: Object.fromEntries(
+        Object.entries(pkg.dependencies).filter(([name]) => name !== '@aws-sdk/client-s3')
+      ),
     },
     null,
     2

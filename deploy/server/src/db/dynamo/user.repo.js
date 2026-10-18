@@ -2,14 +2,23 @@
 'use strict';
 const { makeRepo } = require('./base.repo');
 const { TABLES } = require('./tables');
+const { stripSecrets } = require('../sensitive');
 const repo = makeRepo(TABLES.users);
+
+/**
+ * DynamoDB returns an item whole — it has no equivalent of Mongo's
+ * `select: false`. Without stripping here, a password hash and the session
+ * counters would travel wherever a user object goes, including API
+ * responses. `secrets: true` is what the authentication paths pass.
+ */
+const view = (row, secrets) => (secrets ? row : stripSecrets(row));
 
 const norm = (e) => String(e || '').toLowerCase().trim();
 
 module.exports = {
   raw: repo,
 
-  getById: (id) => repo.get(id),
+  getById: async (id, { secrets } = {}) => view(await repo.get(id), secrets),
 
   /**
    * Sign-in lookup.
@@ -17,19 +26,19 @@ module.exports = {
    * DynamoDB has no case-insensitive comparison, and normalising on read
    * would mean scanning the table on every login attempt.
    */
-  async findByEmail(email) {
+  async findByEmail(email, { secrets } = {}) {
     const rows = await repo.query(norm(email), { index: 'email-index', limit: 1 });
-    return rows[0] || null;
+    return view(rows[0] || null, secrets);
   },
 
-  async findByGoogleId(googleId) {
+  async findByGoogleId(googleId, { secrets } = {}) {
     const rows = await repo.query(String(googleId), { index: 'googleId-index', limit: 1 });
-    return rows[0] || null;
+    return view(rows[0] || null, secrets);
   },
 
-  async findFirstAdmin() {
+  async findFirstAdmin({ secrets } = {}) {
     const rows = await repo.query('admin', { index: 'role-createdAt-index', limit: 1 });
-    return rows[0] || null;
+    return view(rows[0] || null, secrets);
   },
 
   async create(doc) {
@@ -46,10 +55,10 @@ module.exports = {
     });
   },
 
-  async update(id, changes = {}, { remove = [] } = {}) {
+  async update(id, changes = {}, { remove = [], secrets } = {}) {
     const set = { ...changes, updatedAt: repo.nowIso() };
     if (set.email) set.email = norm(set.email);
-    return repo.update(id, undefined, { set, remove });
+    return view(await repo.update(id, undefined, { set, remove }), secrets);
   },
 
   /**
@@ -57,7 +66,7 @@ module.exports = {
    * version the tokens are signed against. ADD is atomic, so two sign-outs
    * racing each other still both take effect.
    */
-  bumpTokenVersion: (id) => repo.update(id, undefined, { add: { tokenVersion: 1 } }),
+  bumpTokenVersion: (id) => repo.update(id, undefined, { add: { tokenVersion: 1 } }),   // returns secrets by design
 
   recordFailedLogin: (id, lockedUntil) =>
     repo.update(id, undefined, { add: { failedLoginAttempts: 1 }, set: { lockedUntil } }),
@@ -68,8 +77,10 @@ module.exports = {
   /** Admin user list. A Scan is honest here: there is no partition that means
       "every user", and the table is small. */
   async listAll({ role, limit } = {}) {
-    if (role) return repo.query(role, { index: 'role-createdAt-index', descending: true, limit });
-    return repo.scan({ limit });
+    const rows = role
+      ? await repo.query(role, { index: 'role-createdAt-index', descending: true, limit })
+      : await repo.scan({ limit });
+    return rows.map((r) => stripSecrets(r));
   },
 
   count: () => repo.count(),

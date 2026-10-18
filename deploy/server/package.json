@@ -24,7 +24,9 @@
     "dynamo:tables": "node src/jobs/dynamo-create-tables.js",
     "dynamo:verify": "node src/jobs/dynamo-create-tables.js --verify",
     "dynamo:migrate:dry": "node src/jobs/migrate-mongo-to-dynamo.js --dry-run",
-    "dynamo:migrate": "node src/jobs/migrate-mongo-to-dynamo.js"
+    "dynamo:migrate": "node src/jobs/migrate-mongo-to-dynamo.js",
+    "test:contract:mongo": "DB_DRIVER=mongo node tests/db-contract.test.js",
+    "test:contract:dynamo": "DB_DRIVER=dynamo node tests/db-contract.test.js"
   },
   "dependencies": {
     "@aws-sdk/client-dynamodb": "^3.1152.0",
@@ -51,6 +53,7 @@
   },
   "devDependencies": {
     "dynalite": "^4.0.0",
+    "mongodb-memory-server": "^11.3.0",
     "nodemon": "^3.1.4",
     "pino-pretty": "^11.2.2",
     "pm2": "^7.0.3"

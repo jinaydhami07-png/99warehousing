@@ -1,0 +1,41 @@
+# AWS App Runner build configuration.
+#
+# App Runner reads this from the repository root it is pointed at, builds the
+# app, and runs it. There is no Dockerfile because the managed Node runtime
+# already provides one — fewer moving parts, and security patches to the base
+# image arrive without a rebuild on your side.
+#
+# PORT is supplied by App Runner. server.js reads it and, since the Vercel
+# work, also accepts a socket path, so nothing here needs to pin it.
+#
+# Secrets are NOT listed here. This file is committed to a public repository.
+# MONGODB_URI, the JWT secrets and the Google client secret are set in the
+# App Runner console (or better, as references to AWS Secrets Manager), and
+# DynamoDB needs no credentials at all because the instance role supplies them.
+version: 1.0
+runtime: nodejs18
+build:
+  commands:
+    build:
+      # --omit=dev: nodemon, pino-pretty and pm2 are development-only, and
+      # App Runner supervises the process itself.
+      - npm ci --omit=dev
+run:
+  runtime-version: 20
+  command: node app.js
+  network:
+    port: 8080
+  env:
+    - name: NODE_ENV
+      value: production
+    - name: PORT
+      value: "8080"
+    # Behind App Runner's load balancer, so the client IP arrives in
+    # X-Forwarded-For. Without this, rate limits apply to the proxy rather
+    # than to each visitor.
+    - name: TRUST_PROXY
+      value: "1"
+    - name: AWS_REGION
+      value: ap-south-1
+    - name: DB_DRIVER
+      value: mongo

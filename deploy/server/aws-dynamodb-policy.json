@@ -1,0 +1,25 @@
+{
+  "Version": "2012-10-17",
+  "Comment": "Least-privilege DynamoDB access for the 99warehousing App Runner instance role. Scoped to this app's tables and their indexes only: no CreateTable, no DeleteTable, no access to any other table in the account. Replace REGION and ACCOUNT_ID before use.",
+  "Statement": [
+    {
+      "Sid": "ReadWriteOwnTables",
+      "Effect": "Allow",
+      "Action": [
+        "dynamodb:GetItem",
+        "dynamodb:PutItem",
+        "dynamodb:UpdateItem",
+        "dynamodb:DeleteItem",
+        "dynamodb:Query",
+        "dynamodb:Scan",
+        "dynamodb:BatchGetItem",
+        "dynamodb:BatchWriteItem",
+        "dynamodb:DescribeTable"
+      ],
+      "Resource": [
+        "arn:aws:dynamodb:REGION:ACCOUNT_ID:table/99w_*",
+        "arn:aws:dynamodb:REGION:ACCOUNT_ID:table/99w_*/index/*"
+      ]
+    }
+  ]
+}

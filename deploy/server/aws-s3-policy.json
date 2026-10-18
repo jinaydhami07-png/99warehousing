@@ -1,0 +1,18 @@
+{
+  "Version": "2012-10-17",
+  "Comment": "Image storage for the 99warehousing App Runner instance role. Object-level access to one bucket; no bucket creation, deletion or policy changes. Replace BUCKET before use.",
+  "Statement": [
+    {
+      "Sid": "ImageObjects",
+      "Effect": "Allow",
+      "Action": ["s3:GetObject", "s3:PutObject", "s3:DeleteObject"],
+      "Resource": "arn:aws:s3:::BUCKET/*"
+    },
+    {
+      "Sid": "ListForPrefixChecks",
+      "Effect": "Allow",
+      "Action": ["s3:ListBucket"],
+      "Resource": "arn:aws:s3:::BUCKET"
+    }
+  ]
+}

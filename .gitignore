@@ -27,3 +27,6 @@ godaddy-upload/public/uploads/
 .DS_Store
 ._*
 .claude/
+
+# Working notes, not part of the codebase.
+SESSION-SUMMARY.md

@@ -105,7 +105,28 @@ This guard is worth knowing about before the cutover rather than during it:
 the file that works in development is rejected in production on five counts
 at once.
 
-### 2. Watchdog
+### 2. Update the checkout
+
+The `.htaccess` and the watchdog are both in the deployment repository now,
+so the server picks them up with a pull. In cPanel → **Terminal**:
+
+```bash
+cd ~/nodeapp && git pull origin main
+```
+
+**This will fail the first time.** A hand-written `keepalive.sh` is already
+sitting there untracked, and Git refuses to overwrite an untracked file:
+`error: untracked working tree file 'keepalive.sh' would be overwritten`.
+Move it aside and pull again — keeping it rather than deleting it, so the
+version that was verified to work on the host is still there to compare
+against:
+
+```bash
+mv ~/nodeapp/keepalive.sh ~/nodeapp/keepalive.sh.original
+cd ~/nodeapp && git pull origin main && chmod +x keepalive.sh
+```
+
+### 3. Watchdog
 
 cPanel → **Tools → Cron Jobs**, every two minutes:
 
@@ -113,10 +134,15 @@ cPanel → **Tools → Cron Jobs**, every two minutes:
 */2 * * * *   $HOME/nodeapp/keepalive.sh >/dev/null 2>&1
 ```
 
-Confirm it is working by killing the process and waiting: it should come back
-within two minutes, and `~/nodeapp/keepalive.log` should record the restart.
+Only the account owner can create this, which is why it is still outstanding.
 
-### 3. Cutover
+Confirm it works by killing the process and waiting: it should return within
+two minutes and `~/nodeapp/keepalive.log` should record the restart. The
+script checks `/health` over HTTP rather than looking for a running process,
+because the failure this hosting produces is a process that is alive and
+wedged, which a PID check calls healthy.
+
+### 4. Cutover
 
 Only after 1 and 2 are verified.
 

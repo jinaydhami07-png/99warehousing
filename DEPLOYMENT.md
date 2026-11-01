@@ -58,10 +58,20 @@ Already done on the server:
 
 Not done:
 
-- The cron entry that runs the watchdog
-- The real settings file (a throwaway is in place, pointing at a dead database)
+- The cron entry that runs the watchdog — cPanel only lets the account owner
+  create one
+- Uploading the settings file. It is generated and verified at
+  `deploy/server/env.production`; the server still has a throwaway pointing at
+  a dead database
 - The cutover: the domain still serves the old `public_html` files, which
   return 403/404
+
+The API itself is verified end to end against Atlas on this machine, in
+production mode and behind Apache: 18 listings served with correct pagination,
+the JWT round trip (register, authenticate, tamper-reject, refresh by
+httpOnly cookie, sign in, reject a wrong password) all behaving, stack traces
+suppressed, and the security headers present. What is left is hosting, not
+code.
 
 ---
 
@@ -69,25 +79,31 @@ Not done:
 
 ### 1. Settings file
 
-Replace `~/nodeapp/server/env` with the production one, through File Manager.
-It must include:
+A filled-in file is generated locally at `deploy/server/env.production`:
+real credentials carried over from the development `.env`, and fresh JWT
+secrets and admin passkey generated for it. Upload it through File Manager as
+`~/nodeapp/server/env` — **it is not in this repository and must not be**, so
+it has to be copied across by hand.
 
-```
-NODE_ENV=production
-TRUST_PROXY=1
-PORT=<the port the .htaccess rewrite targets>
-MONGODB_URI=...
-JWT_ACCESS_SECRET=...        # 32+ chars, different from the refresh secret
-JWT_REFRESH_SECRET=...
-ADMIN_PASSKEY=...            # 12+ chars
-CORS_ORIGINS=https://99warehousing.com,https://www.99warehousing.com
-```
+It is named `env`, not `.env`, because cPanel File Manager hides dotfiles and
+routinely drops the dot. `server/src/config/env.js` accepts either.
 
-`TRUST_PROXY=1` matters: behind the rewrite every request appears to come from
-the server itself, so without it rate limits apply to all visitors at once.
+The app refuses to start in production until all of this holds, and the
+message names whatever is wrong:
 
-The file is named `env`, not `.env`, because cPanel File Manager hides dotfiles
-and routinely drops the dot. `server/src/config/env.js` accepts either.
+| Setting | Why it is refused otherwise |
+|---|---|
+| `NODE_ENV=production` | development mode loads `pino-pretty`, absent under `--omit=dev` |
+| `TRUST_PROXY=1` | every request arrives from 127.0.0.1, so rate limits would apply to all visitors at once |
+| `PORT=5050` | must match the `.htaccess` rewrite |
+| `JWT_ACCESS_SECRET` / `JWT_REFRESH_SECRET` | 32+ chars, and **different** — one shared key lets a stolen access token be replayed as a refresh token |
+| `ADMIN_PASSKEY` | 12+ chars; it is the only thing in front of the moderation dashboard |
+| `CORS_ORIGINS` | no `localhost`, never `*` — credentials ride along with requests |
+| `GOOGLE_CALLBACK_URL` | https and the live domain, or sign-in returns the code to the wrong host |
+
+This guard is worth knowing about before the cutover rather than during it:
+the file that works in development is rejected in production on five counts
+at once.
 
 ### 2. Watchdog
 
@@ -106,18 +122,31 @@ Only after 1 and 2 are verified.
 
 1. Clear the leftovers from `public_html` — the stray `.zip`, the nested
    `public_html/`, `READ-ME-FIRST.txt`, the old app folder.
-2. Add the proxy rewrite to `public_html/.htaccess`:
-
-```apache
-RewriteEngine On
-RewriteRule ^(.*)$ http://127.0.0.1:<PORT>/$1 [P,L]
-```
-
+2. Upload the site: the contents of `deploy/public/` into `public_html/`,
+   including `.htaccess` (File Manager must be set to show dotfiles).
 3. Check `https://99warehousing.com/api/v1/health` reports
    `"database":"connected"`, then load the homepage and the warehouses page.
 
-**Rollback** is removing that `.htaccess` rewrite — Apache goes straight back
-to serving files from `public_html`.
+`deploy/public/.htaccess` ships with the site and carries the rewrite:
+
+```apache
+RewriteRule ^api/(.*)$ http://127.0.0.1:5050/api/$1 [P,QSA,L]
+```
+
+**Only `/api/*` is proxied; Apache serves the pages itself.** An earlier
+draft of this guide proxied everything to Node, which is the obvious reading
+of "put Node behind Apache" and the wrong one here: nothing supervises the
+process on this hosting, so a Node crash would take the entire website down
+rather than just the API. Verified against Apache 2.4 with this exact file —
+with Node killed, pages and assets still return 200 and only `/api` degrades
+to 503, which the pages absorb by falling back to their bundled sample data.
+
+The port appears in two places, here and `PORT` in `server/env`. If they ever
+disagree, every API call returns 502 while the site looks perfectly healthy —
+check that first when the pages load but no data appears.
+
+**Rollback** is removing the `API → Node` block from that `.htaccess`. Apache
+then serves the site exactly as it did before Node existed.
 
 ---
 

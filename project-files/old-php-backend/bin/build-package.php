@@ -4,7 +4,7 @@
  *
  *     php bin/build-package.php
  *
- * Produces, at the repository's dist/:
+ * Produces, in this folder's own dist/:
  *
  *     99warehousing-php/
  *     ├── public_html/        → upload INTO public_html
@@ -27,8 +27,11 @@
  */
 declare(strict_types=1);
 
-$root = dirname(__DIR__);                    // godaddy-upload-php/
-$dist = dirname($root) . '/dist';            // the repo's dist/
+$root = dirname(__DIR__);                    // this folder
+/* Inside the folder, not beside it. Everything belonging to the retired PHP
+   build lives under one directory, so it can be archived or deleted whole
+   without hunting for artifacts left elsewhere in the repository. */
+$dist = $root . '/dist';
 $out = $dist . '/99warehousing-php';
 $web = $out . '/public_html';
 $app = $out . '/99warehousing-app';

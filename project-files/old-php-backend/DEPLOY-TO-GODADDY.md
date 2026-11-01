@@ -41,8 +41,8 @@ Write down all three values with their prefixes. They go in `config/.env`.
 
 ## 2. Get the package
 
-A ready-to-upload build is at **`dist/99warehousing-php-cpanel.zip`** (and
-unzipped at `dist/99warehousing-php/`). It is already split into the two
+A ready-to-upload build is at **`dist/99warehousing-php-cpanel.zip`** inside
+this folder (and unzipped at `dist/99warehousing-php/`). It is already split into the two
 folders the server needs, so there is no rearranging to do by hand.
 
 Rebuild it after any change with:

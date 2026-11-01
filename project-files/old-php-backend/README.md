@@ -155,7 +155,7 @@ admin route cannot drift apart.
 php bin/build-package.php
 ```
 
-Writes an upload-ready build to the repository's `dist/`:
+Writes an upload-ready build to this folder's own `dist/`:
 
 ```
 dist/99warehousing-php/

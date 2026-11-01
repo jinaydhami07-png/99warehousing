@@ -14,7 +14,7 @@
     "seed:fresh": "node src/jobs/seed.js --wipe",
     "migrate:images": "node src/jobs/migrate-images-to-s3.js",
     "migrate:images:dry": "node src/jobs/migrate-images-to-s3.js --dry-run",
-    "test": "node --test tests/",
+    "test": "npm run test:contract:mongo && npm run test:contract:dynamo",
     "pm2:start": "pm2 start ecosystem.config.js",
     "pm2:stop": "pm2 stop bpsf-api",
     "pm2:restart": "pm2 restart bpsf-api",
@@ -25,8 +25,8 @@
     "dynamo:verify": "node src/jobs/dynamo-create-tables.js --verify",
     "dynamo:migrate:dry": "node src/jobs/migrate-mongo-to-dynamo.js --dry-run",
     "dynamo:migrate": "node src/jobs/migrate-mongo-to-dynamo.js",
-    "test:contract:mongo": "DB_DRIVER=mongo node tests/db-contract.test.js",
-    "test:contract:dynamo": "DB_DRIVER=dynamo node tests/db-contract.test.js"
+    "test:contract:mongo": "DB_DRIVER=mongo node tests/db-contract.js",
+    "test:contract:dynamo": "DB_DRIVER=dynamo node tests/db-contract.js"
   },
   "dependencies": {
     "@aws-sdk/client-dynamodb": "^3.1152.0",

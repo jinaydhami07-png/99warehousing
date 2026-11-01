@@ -2,31 +2,69 @@
  * Contract test: identical assertions, run against whichever driver
  * DB_DRIVER selects. If both pass, the drivers are interchangeable and the
  * services can be switched with a configuration change.
+ *
+ * It starts its own database — mongodb-memory-server or dynalite, on a port
+ * the OS picks — so it runs on a clean checkout with nothing set up first.
+ * Both start empty, which is why there is no pre-run cleanup: a contract test
+ * that inherits the last run's rows measures the leftovers.
  */
 const path = require('path');
-const SRV = '/Users/jinaydhami/Documents/99Warehousing/deploy/server';
+const SRV = path.join(__dirname, '..');
 const driver = process.env.DB_DRIVER || 'mongo';
 
+/* Shutdown steps, run in reverse. Without them the ephemeral server keeps
+   the event loop alive and the run hangs instead of reporting. */
+const stops = [];
+async function stopAll() {
+  while (stops.length) {
+    try { await stops.pop()(); } catch { /* already gone; nothing to salvage */ }
+  }
+}
+
+async function startMongo() {
+  const { MongoMemoryServer } = require(path.join(SRV, 'node_modules/mongodb-memory-server'));
+  const mongoose = require(path.join(SRV, 'node_modules/mongoose'));
+  const mem = await MongoMemoryServer.create();
+  stops.push(() => mem.stop());
+  await mongoose.connect(mem.getUri(), { dbName: 'bpsf' });
+  stops.push(() => mongoose.disconnect());
+}
+
+async function startDynamo() {
+  const dynalite = require(path.join(SRV, 'node_modules/dynalite'));
+  const server = dynalite({ createTableMs: 0, updateTableMs: 0, deleteTableMs: 0 });
+  await new Promise((resolve, reject) => {
+    server.listen(0, (err) => (err ? reject(err) : resolve()));
+  });
+  stops.push(() => new Promise((resolve) => server.close(resolve)));
+
+  /* Set before src/db is required: the client reads this at require time. */
+  process.env.DYNAMO_ENDPOINT = `http://127.0.0.1:${server.address().port}`;
+
+  /* Build the tables with the real job rather than a copy of its table
+     definitions, so a drift between the two cannot pass unnoticed.
+     Spawned asynchronously on purpose: dynalite answers from this process's
+     event loop, so a synchronous child would block the very loop that has to
+     serve its requests — a deadlock, not a slow start. */
+  await new Promise((resolve, reject) => {
+    const child = require('child_process').spawn(
+      process.execPath,
+      [path.join(SRV, 'src/jobs/dynamo-create-tables.js')],
+      { env: process.env, stdio: ['ignore', 'pipe', 'pipe'] },
+    );
+    let log = '';
+    child.stdout.on('data', (c) => { log += c; });
+    child.stderr.on('data', (c) => { log += c; });
+    child.on('error', reject);
+    child.on('close', (code) => (code === 0
+      ? resolve()
+      : reject(new Error(`table setup exited ${code}:\n${log}`))));
+  });
+}
+
 (async () => {
-  if (driver === 'mongo') {
-    const mongoose = require(path.join(SRV, 'node_modules/mongoose'));
-    await mongoose.connect('mongodb://127.0.0.1:27018/bpsf');
-    await mongoose.connection.dropDatabase();
-  }
-  if (driver === 'dynamo') {
-    /* Symmetry with dropDatabase() above: a contract test that starts with
-       leftovers from the previous run measures the leftovers. */
-    const { doc } = require(path.join(SRV, 'src/db/dynamo/client'));
-    const { TABLES } = require(path.join(SRV, 'src/db/dynamo/tables'));
-    const { ScanCommand, DeleteCommand } = require(path.join(SRV, 'node_modules/@aws-sdk/lib-dynamodb'));
-    for (const t of Object.values(TABLES)) {
-      const res = await doc.send(new ScanCommand({ TableName: t.name }));
-      for (const item of res.Items || []) {
-        const Key = t.range ? { [t.hash]: item[t.hash], [t.range]: item[t.range] } : { [t.hash]: item[t.hash] };
-        await doc.send(new DeleteCommand({ TableName: t.name, Key }));
-      }
-    }
-  }
+  if (driver === 'mongo') await startMongo();
+  if (driver === 'dynamo') await startDynamo();
 
   const r = require(path.join(SRV, 'src/db'));
 
@@ -121,5 +159,11 @@ const driver = process.env.DB_DRIVER || 'mongo';
   ok((await r.images.listForProperty(p3.id)).length === 0, 'image delete');
 
   console.log(`\n  [${driver}] ${pass} passed, ${fail} failed`);
+  await stopAll();
   process.exit(fail ? 1 : 0);
-})().catch((e) => { console.error('  CRASH:', e.message); console.error(e.stack.split('\n').slice(1, 4).join('\n')); process.exit(1); });
+})().catch(async (e) => {
+  console.error('  CRASH:', e.message);
+  console.error(e.stack.split('\n').slice(1, 4).join('\n'));
+  await stopAll();
+  process.exit(1);
+});

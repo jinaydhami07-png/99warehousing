@@ -27,6 +27,10 @@ godaddy-upload/public/uploads/
 .DS_Store
 ._*
 .claude/
+# Finder duplicates: "name 2.png". Space-then-digit, so real
+# names like hero-2.png are unaffected.
+* [0-9].*
+* [0-9][0-9].*
 
 # Working notes, not part of the codebase.
 SESSION-SUMMARY.md

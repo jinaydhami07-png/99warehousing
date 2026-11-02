@@ -21,6 +21,7 @@
 const mongoose = require('mongoose');
 const database = require('../config/database');
 const repos = require('../db/dynamo');
+const { USER_SECRETS_SELECT } = require('../db/sensitive');
 
 const dryRun = process.argv.includes('--dry-run');
 
@@ -51,8 +52,21 @@ const PLAN = [
   {
     label: 'users',
     model: () => require('../models/user.model'),
+    /* The password hash, the token version and the lockout counters are all
+       `select: false`. A plain find() silently omits them, and the accounts
+       arrive in DynamoDB with no password at all — every one of them locked
+       out, with nothing in the output to say so. Ask for them by name. */
+    select: USER_SECRETS_SELECT,
     to: (d) => ({ ...clean(d), id: id(d._id), email: String(d.email || '').toLowerCase().trim(), createdAt: iso(d.createdAt) || new Date().toISOString() }),
     write: (rows) => repos.users.raw.batchPut(rows),
+    /* Nothing else in this job can tell a migrated password from a missing
+       one, so check it here rather than discovering it at the first login. */
+    check: (docs, rows) => {
+      const want = docs.filter((d) => d.password).length;
+      const got = rows.filter((r) => /^\$2[aby]\$\d{2}\$/.test(String(r.password || ''))).length;
+      return want === got ? null
+        : `${want} account(s) have a password in MongoDB but only ${got} carried a bcrypt hash across`;
+    },
   },
   {
     label: 'properties',
@@ -77,7 +91,9 @@ const PLAN = [
   {
     label: 'enquiries',
     model: () => require('../models/enquiry.model'),
-    to: (d) => ({ ...clean(d), id: id(d._id), user: id(d.user), property: id(d.property), entity: 'ENQUIRY', createdAt: iso(d.createdAt) || new Date().toISOString() }),
+    /* `feed` is the synthetic partition the admin inbox index reads. It used
+       to be written into `entity`, which the index no longer uses. */
+    to: (d) => ({ ...clean(d), id: id(d._id), user: id(d.user), property: id(d.property), feed: 'ENQUIRY', createdAt: iso(d.createdAt) || new Date().toISOString() }),
     write: (rows) => repos.enquiries.raw.batchPut(rows),
   },
   {
@@ -89,7 +105,11 @@ const PLAN = [
   {
     label: 'auditlogs',
     model: () => require('../models/auditlog.model'),
-    to: (d) => ({ ...clean(d), id: id(d._id), entity: 'AUDIT', createdAt: iso(d.createdAt) || new Date().toISOString(),
+    /* `feed` carries the partition; `entity` keeps its own meaning — what the
+       entry is about. Writing the partition constant over it made every row
+       in the admin trail claim the same subject. */
+    to: (d) => ({ ...clean(d), id: id(d._id), feed: 'AUDIT', entity: d.entity || 'property',
+                  createdAt: iso(d.createdAt) || new Date().toISOString(),
                   expiresAt: Math.floor(Date.now() / 1000) + 365 * 86400 }),
     write: (rows) => repos.auditlogs.raw.batchPut(rows),
   },
@@ -115,8 +135,16 @@ const PLAN = [
 
   for (const step of PLAN) {
     const Model = step.model();
-    const docs = await Model.find({}).lean();
+    const docs = await (step.select ? Model.find({}).select(step.select) : Model.find({})).lean();
     const rows = docs.map(step.to);
+
+    if (step.check) {
+      const failure = step.check(docs, rows);
+      if (failure) {
+        console.error(`\n  ABORTED on ${step.label}: ${failure}`);
+        process.exit(1);
+      }
+    }
 
     /* A row missing its key cannot be written, and finding that out mid-batch
        is worse than finding it out now. */

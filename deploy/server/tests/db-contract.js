@@ -144,8 +144,15 @@ async function startDynamo() {
   await r.properties.increment(p3.id, 'views', 5);
   ok((await r.properties.getById(p3.id)).views === 5, 'views increment');
   ok((await r.properties.listByOwner(u.id)).length === 4, 'listByOwner');
+  /* The slug is what a shareable listing URL is built from. It came from a
+     Mongoose pre-save hook, so one driver produced listings with none. */
+  ok(/^panvel-logistics-park-[0-9a-f]{6}$/.test(String(p3.slug)), 'slug generated on create');
+  ok((await r.properties.getById(p3.id)).slug === p3.slug, 'slug persists');
   const st = await r.properties.stats();
   ok(st.approved === 3 && st.pending === 1 && st.total === 4, 'stats', JSON.stringify(st));
+
+  const kept = await r.properties.create({ name: 'Preset Slug Listing', slug: 'chosen-by-hand', city: 'Pune', type: 'Warehouse', grade: 'Grade B', rate: 9, area: 1000, status: 'draft', owner: u.id });
+  ok(kept.slug === 'chosen-by-hand', 'an explicit slug is never overwritten');
 
   // favourites
   await r.favorites.add(u.id, p3.id); await r.favorites.add(u.id, p3.id);

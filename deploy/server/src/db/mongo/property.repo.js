@@ -1,6 +1,8 @@
 'use strict';
 const Property = require('../../models/property.model');
 const { toPlain, toPlainList } = require('./shared');
+const { ensureSlug } = require('../slug');
+const mongoose = require('mongoose');
 
 const SORTS = {
   'rate-asc': { rate: 1 }, 'rate-desc': { rate: -1 },
@@ -37,7 +39,13 @@ function toQuery(f = {}) {
 
 module.exports = {
   getById: async (id) => toPlain(await Property.findById(id).lean()),
-  create: async (doc) => toPlain(await Property.create(doc)),
+  /* The id is minted here rather than left to Mongoose so the slug can be
+     derived from it — the model's hook would otherwise invent a separate
+     random suffix, and the two drivers would disagree on the shape of a URL. */
+  create: async (doc) => {
+    const id = doc.id || doc._id || new mongoose.Types.ObjectId();
+    return toPlain(await Property.create({ ...doc, _id: id, slug: ensureSlug(doc, id) }));
+  },
   update: async (id, changes) =>
     toPlain(await Property.findByIdAndUpdate(id, { $set: changes }, { new: true }).lean()),
   remove: async (id) => { await Property.findByIdAndDelete(id); },

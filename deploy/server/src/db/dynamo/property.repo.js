@@ -25,6 +25,7 @@
 
 const { makeRepo } = require('./base.repo');
 const { TABLES } = require('./tables');
+const { ensureSlug } = require('../slug');
 
 const repo = makeRepo(TABLES.properties);
 
@@ -82,9 +83,11 @@ module.exports = {
 
   async create(doc) {
     const now = repo.nowIso();
+    const id = doc.id || repo.newId();
     const item = {
       ...doc,
-      id: doc.id || repo.newId(),
+      id,
+      slug: ensureSlug(doc, id),
       status: doc.status || 'pending',
       views: doc.views || 0,
       enquiryCount: doc.enquiryCount || 0,

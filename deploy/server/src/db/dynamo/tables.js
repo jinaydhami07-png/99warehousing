@@ -78,7 +78,7 @@ const TABLES = {
   enquiries: {
     name: t('enquiries'),
     hash: 'id',
-    attributes: { id: 'S', user: 'S', property: 'S', entity: 'S', createdAt: 'S' },
+    attributes: { id: 'S', user: 'S', property: 'S', feed: 'S', createdAt: 'S' },
     indexes: [
       { name: 'user-createdAt-index', hash: 'user', range: 'createdAt', project: 'ALL' },
       { name: 'property-createdAt-index', hash: 'property', range: 'createdAt', project: 'ALL' },
@@ -87,7 +87,7 @@ const TABLES = {
          string "ENQUIRY" in `entity`, giving one partition sorted by date.
          The tradeoff is a single hot partition on write — fine at this volume,
          and the note in enquiry.repo.js says what to do if it stops being so. */
-      { name: 'entity-createdAt-index', hash: 'entity', range: 'createdAt', project: 'ALL' },
+      { name: 'feed-createdAt-index', hash: 'feed', range: 'createdAt', project: 'ALL' },
     ],
   },
 
@@ -110,9 +110,9 @@ const TABLES = {
   auditlogs: {
     name: t('auditlogs'),
     hash: 'id',
-    attributes: { id: 'S', entity: 'S', createdAt: 'S' },
+    attributes: { id: 'S', feed: 'S', createdAt: 'S' },
     indexes: [
-      { name: 'entity-createdAt-index', hash: 'entity', range: 'createdAt', project: 'ALL' },
+      { name: 'feed-createdAt-index', hash: 'feed', range: 'createdAt', project: 'ALL' },
     ],
     /* Audit rows are append-only and only the recent ones are ever read.
        expiresAt holds a unix timestamp; DynamoDB deletes expired rows for

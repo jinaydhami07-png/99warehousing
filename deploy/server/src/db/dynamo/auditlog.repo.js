@@ -19,11 +19,27 @@ module.exports = {
     return repo.put({
       ...doc,
       id: doc.id || repo.newId(),
-      entity: PARTITION.AUDIT,
+      /* `feed`, not `entity`. The index needs every row in one partition,
+         but `entity` is a real field — it records what was acted on
+         ('property', 'review'). Putting the partition constant there
+         overwrote it, and the admin trail showed "AUDIT" as the subject of
+         every entry. They are two different things and now have two
+         different attributes. */
+      feed: PARTITION.AUDIT,
+      entity: doc.entity || 'property',
       createdAt: doc.createdAt || now,
       expiresAt: Math.floor(Date.now() / 1000) + RETENTION_DAYS * 86400,
     });
   },
-  list: ({ limit = 100 } = {}) =>
-    repo.query(PARTITION.AUDIT, { index: 'entity-createdAt-index', descending: true, limit }),
+  /* entityId and action narrow the feed. Applied as a DynamoDB
+     FilterExpression, which runs before `limit` is handed back, so a capped
+     page still reflects the matching rows rather than a page of everything
+     cut down afterwards. */
+  list: ({ limit = 100, entityId, action } = {}) =>
+    repo.query(PARTITION.AUDIT, {
+      index: 'feed-createdAt-index',
+      descending: true,
+      limit,
+      filter: { ...(entityId ? { entityId } : {}), ...(action ? { action } : {}) },
+    }),
 };

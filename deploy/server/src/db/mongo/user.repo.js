@@ -2,6 +2,7 @@
 const User = require('../../models/user.model');
 const { toPlain, toPlainList } = require('./shared');
 const { USER_SECRETS_SELECT } = require('../sensitive');
+const { hashIfPlain, passwordChangedStamp } = require('../password');
 
 const norm = (e) => String(e || '').toLowerCase().trim();
 
@@ -23,11 +24,24 @@ module.exports = {
   findFirstAdmin: async ({ secrets } = {}) =>
     toPlain(await sel(User.findOne({ role: 'admin' }), secrets).lean()),
 
-  create: async (doc) => toPlain(await User.create({ ...doc, email: norm(doc.email) })),
+  create: async (doc) =>
+    toPlain(await User.create({
+      ...doc,
+      email: norm(doc.email),
+      password: await hashIfPlain(doc.password),
+    })),
 
   update: async (id, changes = {}, { remove = [], secrets } = {}) => {
     const set = { ...changes };
     if (set.email) set.email = norm(set.email);
+
+    /* findByIdAndUpdate does not fire `pre('save')`, so the model's hashing
+       hook never saw a password set through here. Hash at this boundary
+       instead, where every write passes. */
+    if (set.password) {
+      set.password = await hashIfPlain(set.password);
+      set.passwordChangedAt = passwordChangedStamp();
+    }
     const update = { $set: set };
     if (remove.length) update.$unset = Object.fromEntries(remove.map((f) => [f, 1]));
     return toPlain(await sel(User.findByIdAndUpdate(id, update, { new: true }), secrets).lean());

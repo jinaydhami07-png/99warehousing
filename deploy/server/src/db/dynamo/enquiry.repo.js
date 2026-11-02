@@ -25,7 +25,10 @@ module.exports = {
     return repo.put({
       ...doc,
       id: doc.id || repo.newId(),
-      entity: PARTITION.ENQUIRY,
+      /* `feed` rather than `entity`: a synthetic partition key, kept out of
+         the way of the row's own fields so a DynamoDB row and a Mongo row
+         carry the same attributes. */
+      feed: PARTITION.ENQUIRY,
       status: doc.status || 'new',
       createdAt: doc.createdAt || now,
       updatedAt: now,
@@ -35,6 +38,6 @@ module.exports = {
   update: (id, changes) => repo.update(id, undefined, { set: { ...changes, updatedAt: repo.nowIso() } }),
   listForUser: (userId) => repo.query(String(userId), { index: 'user-createdAt-index', descending: true }),
   listForProperty: (propertyId) => repo.query(String(propertyId), { index: 'property-createdAt-index', descending: true }),
-  listAll: ({ limit } = {}) => repo.query(PARTITION.ENQUIRY, { index: 'entity-createdAt-index', descending: true, limit }),
-  async count() { return (await repo.query(PARTITION.ENQUIRY, { index: 'entity-createdAt-index' })).length; },
+  listAll: ({ limit } = {}) => repo.query(PARTITION.ENQUIRY, { index: 'feed-createdAt-index', descending: true, limit }),
+  async count() { return (await repo.query(PARTITION.ENQUIRY, { index: 'feed-createdAt-index' })).length; },
 };

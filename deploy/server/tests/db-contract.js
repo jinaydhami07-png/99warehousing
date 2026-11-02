@@ -74,7 +74,9 @@ async function startDynamo() {
   };
 
   // users
-  const u = await r.users.create({ name: 'Asha', email: ' Asha@Example.COM ', password: 'x'.repeat(12), role: 'owner' });
+  const { comparePassword: compare } = require(path.join(SRV, 'src/db/password'));
+  const PLAINTEXT_PASSWORD = 'x'.repeat(12);
+  const u = await r.users.create({ name: 'Asha', email: ' Asha@Example.COM ', password: PLAINTEXT_PASSWORD, role: 'owner' });
   ok(u.id && !u._id, 'create returns `id`, never `_id`');
   ok(u.email === 'asha@example.com', 'email normalised');
   ok((await r.users.findByEmail('ASHA@example.com'))?.id === u.id, 'findByEmail case-insensitive');
@@ -92,6 +94,31 @@ async function startDynamo() {
   ok((await r.users.getById(u.id, { secrets: true })).password !== undefined, 'hidden fields returned on request');
   ok((await r.users.findByEmail('asha@example.com')).password === undefined, 'findByEmail withholds password');
   ok((await r.users.listAll())[0].password === undefined, 'listAll withholds password');
+
+  /* Withholding the password from responses is not the same as storing it
+     safely. One driver hashed on the way in through a Mongoose pre-save
+     hook; the other wrote whatever it was handed, so the same call stored a
+     plaintext password. Assert on what is actually at rest. */
+  const stored = await r.users.getById(u.id, { secrets: true });
+  ok(stored.password !== PLAINTEXT_PASSWORD, 'stored password is not the plaintext');
+  ok(/^\$2[aby]\$/.test(String(stored.password)), 'stored password is a bcrypt hash');
+  ok(await compare(PLAINTEXT_PASSWORD, stored.password), 'stored hash verifies against the plaintext');
+
+  /* The update path is a separate hole: Mongoose's pre-save hook never ran
+     for findByIdAndUpdate, so a password *change* wrote plaintext even on
+     the driver that hashed on create. */
+  const NEW_PASSWORD = 'y'.repeat(14);
+  await r.users.update(u.id, { password: NEW_PASSWORD });
+  const changed = await r.users.getById(u.id, { secrets: true });
+  ok(changed.password !== NEW_PASSWORD, 'changed password is not stored as plaintext');
+  ok(await compare(NEW_PASSWORD, changed.password), 'changed password verifies');
+  ok(!(await compare(PLAINTEXT_PASSWORD, changed.password)), 'old password no longer verifies');
+  ok(Boolean(changed.passwordChangedAt), 'password change is stamped');
+
+  /* Re-hashing an existing hash would lock the account out for good. */
+  await r.users.update(u.id, { name: 'Asha Updated' });
+  ok(await compare(NEW_PASSWORD, (await r.users.getById(u.id, { secrets: true })).password),
+     'an unrelated update does not re-hash the password');
 
   // properties
   const mk = (n, o) => r.properties.create({ name: n, owner: u.id, ...o });
@@ -149,8 +176,19 @@ async function startDynamo() {
   ok(await r.reviews.removeById(rid), 'review removeById');
 
   // audit
-  await r.auditlogs.record({ action: 'property.approve', actor: u.id });
+  await r.auditlogs.record({ action: 'property.approve', entity: 'property', entityId: p3.id, actor: u.id });
   ok((await r.auditlogs.list({ limit: 5 })).length === 1, 'audit record + list');
+
+  /* `entity` records what was acted on. One driver used it as its index
+     partition key and overwrote it with a constant, so every entry in the
+     admin trail claimed the same subject. Assert the value comes back. */
+  const trail = await r.auditlogs.list({ limit: 5 });
+  ok(trail[0].entity === 'property', 'audit entity survives the round trip');
+  ok(String(trail[0].entityId) === String(p3.id), 'audit entityId survives the round trip');
+
+  await r.auditlogs.record({ action: 'review.reject', entity: 'review', actor: u.id });
+  ok((await r.auditlogs.list({ limit: 10, action: 'review.reject' })).length === 1, 'audit filter by action');
+  ok((await r.auditlogs.list({ limit: 10, entityId: p3.id })).length === 1, 'audit filter by entityId');
 
   // images
   const img = await r.images.create({ property: p3.id, url: 's3://b/k.webp', w: 1280, contentType: 'image/webp', uploadedBy: u.id, size: 48123, storage: 's3' });

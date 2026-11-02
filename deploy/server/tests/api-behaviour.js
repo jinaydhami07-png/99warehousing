@@ -102,6 +102,10 @@ function normalise(v, key) {
   }
   if (VOLATILE.has(key)) return `<${key}>`;
   if (typeof v === 'string') {
+    /* A slug ends in six hex characters taken from a freshly minted id, so
+       it differs between two runs of identical code. The readable part still
+       has to match. */
+    if (key === 'slug') return v.replace(/-[0-9a-f]{6}$/i, '-<suffix>');
     if (JWT_RE.test(v)) return '<jwt>';
     if (UUID_RE.test(v)) return '<uuid>';
     if (ID_RE.test(v)) return alias(v);

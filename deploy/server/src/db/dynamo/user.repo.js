@@ -3,6 +3,7 @@
 const { makeRepo } = require('./base.repo');
 const { TABLES } = require('./tables');
 const { stripSecrets } = require('../sensitive');
+const { hashIfPlain, passwordChangedStamp } = require('../password');
 const repo = makeRepo(TABLES.users);
 
 /**
@@ -47,6 +48,9 @@ module.exports = {
       ...doc,
       id: doc.id || repo.newId(),
       email: norm(doc.email),
+      /* There is no Mongoose hook on this side. Without this the account is
+         created with its password in plaintext. */
+      password: await hashIfPlain(doc.password),
       role: doc.role || 'buyer',
       tokenVersion: doc.tokenVersion || 0,
       failedLoginAttempts: doc.failedLoginAttempts || 0,
@@ -58,6 +62,10 @@ module.exports = {
   async update(id, changes = {}, { remove = [], secrets } = {}) {
     const set = { ...changes, updatedAt: repo.nowIso() };
     if (set.email) set.email = norm(set.email);
+    if (set.password) {
+      set.password = await hashIfPlain(set.password);
+      set.passwordChangedAt = passwordChangedStamp().toISOString();
+    }
     return view(await repo.update(id, undefined, { set, remove }), secrets);
   },
 

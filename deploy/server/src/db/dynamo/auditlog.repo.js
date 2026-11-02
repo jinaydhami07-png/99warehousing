@@ -12,11 +12,15 @@ const repo = makeRepo(TABLES.auditlogs);
 
 const RETENTION_DAYS = Number(process.env.AUDIT_RETENTION_DAYS || 365);
 
+/* `feed` is the partition marker for the trail index, not a field of the
+   entry. Stripped on the way out so both drivers return the same shape. */
+const strip = (row) => { if (!row) return row; const { feed, ...rest } = row; return rest; };
+
 module.exports = {
   raw: repo,
   async record(doc) {
     const now = repo.nowIso();
-    return repo.put({
+    const written = await repo.put({
       ...doc,
       id: doc.id || repo.newId(),
       /* `feed`, not `entity`. The index needs every row in one partition,
@@ -30,6 +34,7 @@ module.exports = {
       createdAt: doc.createdAt || now,
       expiresAt: Math.floor(Date.now() / 1000) + RETENTION_DAYS * 86400,
     });
+    return strip(written);
   },
   /* entityId and action narrow the feed. Applied as a DynamoDB
      FilterExpression, which runs before `limit` is handed back, so a capped
@@ -41,5 +46,5 @@ module.exports = {
       descending: true,
       limit,
       filter: { ...(entityId ? { entityId } : {}), ...(action ? { action } : {}) },
-    }),
+    }).then((rows) => rows.map(strip)),
 };

@@ -12,6 +12,16 @@ const path = require('path');
 const SRV = path.join(__dirname, '..');
 const driver = process.env.DB_DRIVER || 'mongo';
 
+/* config/env refuses to load a DynamoDB deployment that would store image
+   bytes in the database, because an item is capped at 400KB. This is a data
+   layer test, not a deployment — it never uploads anything — so it satisfies
+   the check and moves on. The bucket is never contacted. */
+if (driver === 'dynamo') {
+  process.env.MEDIA_DRIVER = 's3';
+  process.env.AWS_S3_BUCKET = 'contract-test-bucket-never-contacted';
+  process.env.AWS_REGION = process.env.AWS_REGION || 'ap-southeast-2';
+}
+
 /* Shutdown steps, run in reverse. Without them the ephemeral server keeps
    the event loop alive and the run hangs instead of reporting. */
 const stops = [];

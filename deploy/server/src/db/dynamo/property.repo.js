@@ -50,6 +50,23 @@ const SORTS = {
  * the Mongo text index, concatenated and lower-cased, so a search is one
  * substring test per row.
  */
+/**
+ * `cityLower` and `searchText` exist only so this driver can filter without
+ * a case-insensitive match or a text index. They are not part of a listing
+ * and must not reach the browser: they doubled the size of every card in
+ * the feed and published the driver's internals to anyone with curl.
+ */
+const DERIVED = ['cityLower', 'searchText'];
+
+const strip = (row) => {
+  if (!row) return row;
+  const out = { ...row };
+  for (const f of DERIVED) delete out[f];
+  return out;
+};
+
+const stripAll = (rows) => (rows || []).map(strip);
+
 function derived(doc) {
   const text = [doc.name, doc.description, doc.city, doc.locality, doc.type, doc.grade]
     .filter(Boolean).join(' ').toLowerCase();
@@ -78,7 +95,7 @@ module.exports = {
   raw: repo,
 
   async getById(id) {
-    return repo.get(id);
+    return strip(await repo.get(id));
   },
 
   async create(doc) {
@@ -88,14 +105,26 @@ module.exports = {
       ...doc,
       id,
       slug: ensureSlug(doc, id),
+      /* Schema defaults, which Mongoose applied and DynamoDB will not. */
       status: doc.status || 'pending',
+      type: doc.type || 'Warehouse',
+      grade: doc.grade || 'Grade B',
+      depositMonths: doc.depositMonths !== undefined ? doc.depositMonths : 3,
+      isVerified: doc.isVerified !== undefined ? doc.isVerified : false,
+      /* Mongoose gives every declared array an empty default and builds the
+         nested floorPlan object. Without these the field is simply absent,
+         and the pages read `p.images.length` on a listing that has none. */
+      images: doc.images || [],
+      distances: doc.distances || [],
+      floorPlan: doc.floorPlan || { variants: [] },
       views: doc.views || 0,
       enquiryCount: doc.enquiryCount || 0,
       createdAt: doc.createdAt || now,
       updatedAt: now,
       ...derived(doc),
     };
-    return repo.put(item);
+    await repo.put(item);
+    return strip(item);
   },
 
   /** Partial update. Derived attributes are recomputed when their source changes. */
@@ -104,10 +133,10 @@ module.exports = {
     if (!current) return null;
     const merged = { ...current, ...changes };
     for (const f of remove) delete merged[f];
-    return repo.update(id, undefined, {
+    return strip(await repo.update(id, undefined, {
       set: { ...changes, ...derived(merged), updatedAt: repo.nowIso() },
       remove,
-    });
+    }));
   },
 
   async remove(id) {
@@ -120,7 +149,7 @@ module.exports = {
    * allow, and which is exactly what a view counter attracts.
    */
   async increment(id, field, by = 1) {
-    return repo.update(id, undefined, { add: { [field]: by } });
+    return strip(await repo.update(id, undefined, { add: { [field]: by } }));
   },
 
   /**
@@ -135,7 +164,7 @@ module.exports = {
     const filtered = rows.filter((r) => matches(r, filters));
     filtered.sort(SORTS[sort] || SORTS.newest);
     return {
-      items: filtered.slice(skip, skip + limit),
+      items: stripAll(filtered.slice(skip, skip + limit)),
       total: filtered.length,
     };
   },
@@ -147,11 +176,11 @@ module.exports = {
       repo.query(s, { index: 'status-createdAt-index', descending: true })));
     const rows = batches.flat().filter((r) => matches(r, filters));
     rows.sort(SORTS[sort] || SORTS.newest);
-    return { items: rows.slice(skip, skip + limit), total: rows.length };
+    return { items: stripAll(rows.slice(skip, skip + limit)), total: rows.length };
   },
 
   async listByOwner(ownerId, { limit } = {}) {
-    return repo.query(ownerId, { index: 'owner-createdAt-index', descending: true, limit });
+    return stripAll(await repo.query(ownerId, { index: 'owner-createdAt-index', descending: true, limit }));
   },
 
   async countByStatus(status) {

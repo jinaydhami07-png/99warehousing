@@ -57,7 +57,13 @@ module.exports = {
       /* There is no Mongoose hook on this side. Without this the account is
          created with its password in plaintext. */
       password: await hashIfPlain(doc.password),
+      /* Schema defaults. Mongoose applied these; DynamoDB has no schema, so
+         without them `isActive` arrives undefined and every sign-in is
+         refused with "this account has been deactivated". */
       role: doc.role || 'buyer',
+      authProvider: doc.authProvider || 'local',
+      isActive: doc.isActive !== undefined ? doc.isActive : true,
+      isEmailVerified: doc.isEmailVerified !== undefined ? doc.isEmailVerified : false,
       tokenVersion: doc.tokenVersion || 0,
       failedLoginAttempts: doc.failedLoginAttempts || 0,
       createdAt: doc.createdAt || now,

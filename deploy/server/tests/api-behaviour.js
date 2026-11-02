@@ -36,6 +36,15 @@ process.env.JWT_REFRESH_SECRET = 'behaviour-harness-refresh-secret-not-a-real-ke
 process.env.ADMIN_PASSKEY = 'behaviour-harness-passkey';
 process.env.MONGODB_URI = 'mongodb://127.0.0.1:27017/placeholder-replaced-below';
 
+/* The DynamoDB driver refuses to start unless images go to object storage,
+   because an item is capped at 400KB. Nothing here uploads a file, so the
+   bucket is never contacted — it only has to satisfy the startup check. */
+if (driver === 'dynamo') {
+  process.env.MEDIA_DRIVER = 's3';
+  process.env.AWS_S3_BUCKET = 'harness-bucket-never-contacted';
+  process.env.AWS_REGION = process.env.AWS_REGION || 'ap-southeast-2';
+}
+
 const stops = [];
 async function stopAll() {
   while (stops.length) {

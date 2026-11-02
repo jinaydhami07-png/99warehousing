@@ -16,13 +16,19 @@ const { makeRepo } = require('./base.repo');
 const { TABLES, PARTITION } = require('./tables');
 const repo = makeRepo(TABLES.enquiries);
 
+/* `feed` is this driver's partition marker for the admin inbox index. It is
+   not part of an enquiry and must not reach the browser — the same reason
+   cityLower and searchText are stripped from listings. */
+const strip = (row) => { if (!row) return row; const { feed, ...rest } = row; return rest; };
+const stripAll = (rows) => (rows || []).map(strip);
+
 module.exports = {
   raw: repo,
-  getById: (id) => repo.get(id),
+  getById: async (id) => strip(await repo.get(id)),
 
   async create(doc) {
     const now = repo.nowIso();
-    return repo.put({
+    const created = await repo.put({
       ...doc,
       id: doc.id || repo.newId(),
       /* `feed` rather than `entity`: a synthetic partition key, kept out of
@@ -33,11 +39,12 @@ module.exports = {
       createdAt: doc.createdAt || now,
       updatedAt: now,
     });
+    return strip(created);
   },
 
-  update: (id, changes) => repo.update(id, undefined, { set: { ...changes, updatedAt: repo.nowIso() } }),
-  listForUser: (userId) => repo.query(String(userId), { index: 'user-createdAt-index', descending: true }),
-  listForProperty: (propertyId) => repo.query(String(propertyId), { index: 'property-createdAt-index', descending: true }),
+  update: async (id, changes) => strip(await repo.update(id, undefined, { set: { ...changes, updatedAt: repo.nowIso() } })),
+  listForUser: async (userId) => stripAll(await repo.query(String(userId), { index: 'user-createdAt-index', descending: true })),
+  listForProperty: async (propertyId) => stripAll(await repo.query(String(propertyId), { index: 'property-createdAt-index', descending: true })),
   /* Read the whole date-ordered partition, then filter, page and count in
      memory. DynamoDB cannot do a case-insensitive OR across four attributes,
      and `total` has to reflect the filter rather than the page — so the
@@ -53,7 +60,7 @@ module.exports = {
         .some((v) => String(v || '').toLowerCase().includes(needle));
     });
     const page = limit ? matched.slice(skip, skip + limit) : matched.slice(skip);
-    return { items: page, total: matched.length };
+    return { items: stripAll(page), total: matched.length };
   },
   async count() { return (await repo.query(PARTITION.ENQUIRY, { index: 'feed-createdAt-index' })).length; },
 };

@@ -42,9 +42,15 @@ module.exports = {
     return view(rows[0] || null, secrets);
   },
 
-  async create(doc) {
+  /**
+   * The created row is returned WITHOUT secrets, matching the Mongoose
+   * toJSON transform on the other driver. Registration hands this object
+   * straight back in the API response, so returning the raw item put the
+   * freshly made password hash in the body.
+   */
+  async create(doc, { secrets } = {}) {
     const now = repo.nowIso();
-    return repo.put({
+    const created = await repo.put({
       ...doc,
       id: doc.id || repo.newId(),
       email: norm(doc.email),
@@ -57,6 +63,7 @@ module.exports = {
       createdAt: doc.createdAt || now,
       updatedAt: now,
     });
+    return view(created, secrets);
   },
 
   async update(id, changes = {}, { remove = [], secrets } = {}) {
@@ -89,6 +96,22 @@ module.exports = {
       ? await repo.query(role, { index: 'role-createdAt-index', descending: true, limit })
       : await repo.scan({ limit });
     return rows.map((r) => stripSecrets(r));
+  },
+
+  /* Admin list. A Scan is honest here: there is no partition that means
+     "every user", DynamoDB has no case-insensitive match, and `total` has
+     to reflect the search rather than the page. The table is small. */
+  async page({ role, search, skip = 0, limit = 0 } = {}) {
+    const rows = role
+      ? await repo.query(role, { index: 'role-createdAt-index', descending: true })
+      : await repo.scan({});
+    rows.sort((a, b) => String(b.createdAt || '').localeCompare(String(a.createdAt || '')));
+    const needle = search ? String(search).toLowerCase() : null;
+    const matched = needle
+      ? rows.filter((u) => [u.name, u.email].some((v) => String(v || '').toLowerCase().includes(needle)))
+      : rows;
+    const page = limit ? matched.slice(skip, skip + limit) : matched.slice(skip);
+    return { items: page.map((r) => stripSecrets(r)), total: matched.length };
   },
 
   count: () => repo.count(),

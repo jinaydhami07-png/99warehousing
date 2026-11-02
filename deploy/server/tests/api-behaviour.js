@@ -90,7 +90,11 @@ function alias(id) {
 
 /* Volatile by nature: they change between two runs of identical code, so
    comparing them would report a difference that means nothing. */
-const VOLATILE = new Set(['uptime', 'memoryMB', 'timestamp', 'requestId', 'expiresIn']);
+/* `stack` is in the body because the harness runs in development mode,
+   where the error handler includes it. It carries absolute paths and line
+   numbers, so it changes on any edit anywhere above the throw — comparing it
+   reports a difference for every refactor and hides the real ones. */
+const VOLATILE = new Set(['uptime', 'memoryMB', 'timestamp', 'requestId', 'expiresIn', 'stack']);
 
 function normalise(v, key) {
   if (v === null || v === undefined) return v;
@@ -306,6 +310,29 @@ async function run(fx) {
     port = server.address().port;
 
     await run(fx);
+
+    /* A blanket check, because this leak has now happened four separate
+       ways: req.user, users.create, the sign-in response and the refresh
+       response. Every one was the same root cause — Mongoose's toJSON
+       transform was doing security work, and it stops running the moment a
+       row comes from the repository layer instead of a document.
+       Rather than remember every return path, assert on the output. */
+    const SECRETS = ['password', 'tokenVersion', 'failedLoginAttempts', 'lockedUntil', 'passwordChangedAt'];
+    const leaks = [];
+    const walk = (node, label, path) => {
+      if (node === null || typeof node !== 'object') return;
+      if (Array.isArray(node)) { node.forEach((v, i) => walk(v, label, `${path}[${i}]`)); return; }
+      for (const [k, v] of Object.entries(node)) {
+        if (SECRETS.includes(k)) leaks.push(`${label}: ${path}.${k}`);
+        walk(v, label, `${path}.${k}`);
+      }
+    };
+    for (const r of results) walk(r.body, r.label, 'body');
+    if (leaks.length) {
+      process.stderr.write(`SECRET LEAK in ${leaks.length} place(s):\n  ${leaks.join('\n  ')}\n`);
+      await stopAll();
+      process.exit(2);
+    }
 
     process.stdout.write(`${JSON.stringify({ driver, results }, null, 2)}\n`);
   } catch (err) {

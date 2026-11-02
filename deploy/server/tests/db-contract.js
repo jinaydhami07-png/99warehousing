@@ -78,6 +78,10 @@ async function startDynamo() {
   const PLAINTEXT_PASSWORD = 'x'.repeat(12);
   const u = await r.users.create({ name: 'Asha', email: ' Asha@Example.COM ', password: PLAINTEXT_PASSWORD, role: 'owner' });
   ok(u.id && !u._id, 'create returns `id`, never `_id`');
+  /* Registration hands the created user straight back in the API response,
+     so create() must withhold secrets the way every other read does. */
+  ok(u.password === undefined, 'create withholds the password hash');
+  ok(u.tokenVersion === undefined, 'create withholds tokenVersion');
   ok(u.email === 'asha@example.com', 'email normalised');
   ok((await r.users.findByEmail('ASHA@example.com'))?.id === u.id, 'findByEmail case-insensitive');
   await r.users.bumpTokenVersion(u.id); await r.users.bumpTokenVersion(u.id);

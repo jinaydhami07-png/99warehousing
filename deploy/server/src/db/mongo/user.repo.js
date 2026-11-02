@@ -64,5 +64,23 @@ module.exports = {
 
   listAll: async ({ role, limit } = {}) =>
     toPlainList(await User.find(role ? { role } : {}).sort({ createdAt: -1 }).limit(limit || 0).lean()),
+
+  /* Admin list: filter, search, page, and a total that counts matches
+     rather than the page. The projection is gone — the repository already
+     withholds the select:false fields, so there is no second list of field
+     names here to drift out of step with the first. */
+  async page({ role, search, skip = 0, limit = 0 } = {}) {
+    const filter = {};
+    if (role) filter.role = role;
+    if (search) {
+      const safe = String(search).replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+      filter.$or = [{ name: new RegExp(safe, 'i') }, { email: new RegExp(safe, 'i') }];
+    }
+    const [items, total] = await Promise.all([
+      User.find(filter).sort({ createdAt: -1 }).skip(skip).limit(limit).lean(),
+      User.countDocuments(filter),
+    ]);
+    return { items: toPlainList(items), total };
+  },
   count: () => User.countDocuments(),
 };

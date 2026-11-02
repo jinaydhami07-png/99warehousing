@@ -99,12 +99,14 @@ module.exports = {
   },
 
   /** Partial update. Derived attributes are recomputed when their source changes. */
-  async update(id, changes) {
+  async update(id, changes, { remove = [] } = {}) {
     const current = await repo.get(id);
     if (!current) return null;
     const merged = { ...current, ...changes };
+    for (const f of remove) delete merged[f];
     return repo.update(id, undefined, {
       set: { ...changes, ...derived(merged), updatedAt: repo.nowIso() },
+      remove,
     });
   },
 

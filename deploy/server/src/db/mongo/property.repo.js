@@ -46,8 +46,14 @@ module.exports = {
     const id = doc.id || doc._id || new mongoose.Types.ObjectId();
     return toPlain(await Property.create({ ...doc, _id: id, slug: ensureSlug(doc, id) }));
   },
-  update: async (id, changes) =>
-    toPlain(await Property.findByIdAndUpdate(id, { $set: changes }, { new: true }).lean()),
+  /* `remove` clears fields outright. Setting them to undefined does not:
+     Mongoose drops undefined keys from $set, so a rejection reason would
+     stay attached to a listing that is no longer rejected. */
+  update: async (id, changes, { remove = [] } = {}) => {
+    const update = { $set: changes };
+    if (remove.length) update.$unset = Object.fromEntries(remove.map((f) => [f, 1]));
+    return toPlain(await Property.findByIdAndUpdate(id, update, { new: true }).lean());
+  },
   remove: async (id) => { await Property.findByIdAndDelete(id); },
   increment: async (id, field, by = 1) =>
     toPlain(await Property.findByIdAndUpdate(id, { $inc: { [field]: by } }, { new: true }).lean()),

@@ -165,7 +165,16 @@ async function startDynamo() {
   const e = await r.enquiries.create({ user: u.id, property: p3.id, name: 'Buyer', email: 'b@x.com', message: 'Available for a three year lease?' });
   ok((await r.enquiries.listForUser(u.id)).length === 1, 'enquiries for user');
   ok((await r.enquiries.listForProperty(p3.id)).length === 1, 'enquiries for property');
-  ok((await r.enquiries.listAll()).length === 1, 'enquiry admin list');
+  const inbox = await r.enquiries.listAll();
+  ok(inbox.items.length === 1 && inbox.total === 1, 'enquiry admin list');
+  ok((await r.enquiries.listAll({ q: 'Buyer' })).total === 1, 'enquiry search by name');
+  ok((await r.enquiries.listAll({ q: 'nobody-here' })).total === 0, 'enquiry search miss');
+  ok((await r.enquiries.listAll({ status: 'new' })).total === 1, 'enquiry filter by status');
+  ok((await r.enquiries.listAll({ status: 'closed' })).total === 0, 'enquiry status miss');
+  /* total counts the matches, not the page: a pager built on page length
+     cannot tell a last page from a full one. */
+  const paged = await r.enquiries.listAll({ limit: 1, skip: 1 });
+  ok(paged.items.length === 0 && paged.total === 1, 'enquiry paging keeps total honest');
   await r.enquiries.update(e.id, { status: 'handled' });
   ok((await r.enquiries.getById(e.id)).status === 'handled', 'enquiry update');
 

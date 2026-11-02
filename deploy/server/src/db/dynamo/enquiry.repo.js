@@ -38,6 +38,22 @@ module.exports = {
   update: (id, changes) => repo.update(id, undefined, { set: { ...changes, updatedAt: repo.nowIso() } }),
   listForUser: (userId) => repo.query(String(userId), { index: 'user-createdAt-index', descending: true }),
   listForProperty: (propertyId) => repo.query(String(propertyId), { index: 'property-createdAt-index', descending: true }),
-  listAll: ({ limit } = {}) => repo.query(PARTITION.ENQUIRY, { index: 'feed-createdAt-index', descending: true, limit }),
+  /* Read the whole date-ordered partition, then filter, page and count in
+     memory. DynamoDB cannot do a case-insensitive OR across four attributes,
+     and `total` has to reflect the filter rather than the page — so the
+     filtering has to happen somewhere the count can see all of it. The inbox
+     is small; revisit if it ever approaches DynamoDB's 1MB page. */
+  async listAll({ status, q, skip = 0, limit = 0 } = {}) {
+    const all = await repo.query(PARTITION.ENQUIRY, { index: 'feed-createdAt-index', descending: true });
+    const needle = q ? String(q).toLowerCase() : null;
+    const matched = all.filter((e) => {
+      if (status && e.status !== status) return false;
+      if (!needle) return true;
+      return [e.name, e.email, e.company, e.subject]
+        .some((v) => String(v || '').toLowerCase().includes(needle));
+    });
+    const page = limit ? matched.slice(skip, skip + limit) : matched.slice(skip);
+    return { items: page, total: matched.length };
+  },
   async count() { return (await repo.query(PARTITION.ENQUIRY, { index: 'feed-createdAt-index' })).length; },
 };

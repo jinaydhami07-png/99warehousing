@@ -8,6 +8,8 @@
 .env.*
 !.env.example
 env
+env.*
+!env.example
 *env.bak
 
 # ── Build output that carries secrets ─────────────────────

@@ -189,6 +189,16 @@ async function startDynamo() {
   ok(rating.average === 5 && rating.count === 1, 'average rating', JSON.stringify(rating));
   await r.reviews.moderate(rid, 'rejected');
   ok((await r.reviews.getById(rid)).status === 'rejected', 'moderate');
+  ok((await r.reviews.pageForProperty(p3.id, { status: 'published' })).total >= 0, 'review paging for property');
+  ok((await r.reviews.pageByStatus('published')).total >= 0, 'review paging by status');
+
+  /* A rejection reason belongs only to a rejected review; carrying a stale
+     one onto an approval shows the author why it was turned down next to
+     the news that it was published. */
+  const rej = await r.reviews.moderate(rid, 'rejected', 'Not specific enough');
+  ok(rej.rejectionReason === 'Not specific enough', 'rejection reason stored');
+  const app = await r.reviews.moderate(rid, 'published');
+  ok(!app.rejectionReason, 'rejection reason cleared on approval');
   ok(await r.reviews.removeById(rid), 'review removeById');
 
   // audit

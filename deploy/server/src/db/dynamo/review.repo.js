@@ -44,10 +44,31 @@ module.exports = {
   listByStatus: (status, { limit } = {}) =>
     repo.query(status, { index: 'status-createdAt-index', descending: true, limit }),
 
-  async moderate(id, status) {
+  /* Paged variants return `total` as the count of MATCHING rows, not the
+     page length. Both read the partition and slice in memory: a review set
+     for one property, or one moderation queue, is small, and DynamoDB
+     cannot report a filtered count without reading the rows anyway. */
+  async pageForProperty(propertyId, { status, skip = 0, limit = 0 } = {}) {
+    const all = await repo.query(String(propertyId), { filter: status ? { status } : undefined });
+    all.sort((a, b) => String(b.createdAt || '').localeCompare(String(a.createdAt || '')));
+    return { items: limit ? all.slice(skip, skip + limit) : all.slice(skip), total: all.length };
+  },
+
+  async pageByStatus(status, { skip = 0, limit = 0 } = {}) {
+    const all = await repo.query(status, { index: 'status-createdAt-index', descending: true });
+    return { items: limit ? all.slice(skip, skip + limit) : all.slice(skip), total: all.length };
+  },
+
+  /* A rejection reason belongs only to a rejected review — carrying a stale
+     one onto an approval would show the author why it was turned down right
+     next to the news that it was published. */
+  async moderate(id, status, rejectionReason) {
     const row = await this.getById(id);
     if (!row) return null;
-    return repo.update(row.property, row.author, { set: { status, updatedAt: repo.nowIso() } });
+    return repo.update(row.property, row.author, {
+      set: { status, updatedAt: repo.nowIso(), ...(status === 'rejected' ? { rejectionReason } : {}) },
+      ...(status === 'rejected' ? {} : { remove: ['rejectionReason'] }),
+    });
   },
 
   async removeById(id) {
